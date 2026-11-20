@@ -6,9 +6,7 @@
 
 ![浅色与深色预览](docs/preview.png)
 
-## 👉 [打开在线配置器，自己调](https://lumidarin.github.io/agy-capsule-cli/)
-
-在预览里直接点任意一项开关，调好后点复制图标，把生成的 `/capsule-guide ...` 发给 Agent 即可生效。
+## 👉 [打开在线配置器，调](https://lumidarin.github.io/agy-capsule-cli/)好发给 Agent 即可生效
 
 ## 安装
 
@@ -34,8 +32,6 @@ node cli/install.mjs
 - **自然语言**：`/capsule-guide 极简模式`、`/capsule-guide 隐藏图标和周倒计时`。
 - **命令行**：`node ~/.gemini/config/agy-capsule/cli/settings.mjs show | mode | enable | disable | reset`。
 - **直接改** `~/.gemini/config/agy-capsule/cli/settings.json`。
-
-可调内容：通用／极简预设、12 个独立显隐开关、正文颜色、Ctx／Cache／额度的提醒样式。完整字段见[在线配置器](https://lumidarin.github.io/agy-capsule-cli/)与 [capsule-guide skill](skills/capsule-guide/SKILL.md)。
 
 ## 说明
 

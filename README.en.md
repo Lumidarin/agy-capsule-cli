@@ -6,9 +6,7 @@ A statusline for Antigravity CLI (`agy`) that is **fully customizable**: choose 
 
 ![Light and dark preview](docs/preview.png)
 
-## 👉 [Open the Web Configurator and make it yours](https://lumidarin.github.io/agy-capsule-cli/)
-
-Click any item in the preview to toggle it, then copy the generated `/capsule-guide ...` command and send it to your agent.
+## 👉 [Open the Web Configurator](https://lumidarin.github.io/agy-capsule-cli/), tweak it, and send the result to your agent
 
 ## Install
 
@@ -34,8 +32,6 @@ Restart `agy` afterwards. To update, pull and re-run `node cli/install.mjs` (set
 - **Natural language**: `/capsule-guide compact mode`, `/capsule-guide hide icons and weekly reset`.
 - **CLI**: `node ~/.gemini/config/agy-capsule/cli/settings.mjs show | mode | enable | disable | reset`.
 - **Edit** `~/.gemini/config/agy-capsule/cli/settings.json` directly.
-
-Adjustable: standard/compact presets, 12 independent visibility toggles, text color, and alert styles for Ctx / Cache / quota. See the [Web Configurator](https://lumidarin.github.io/agy-capsule-cli/) and the [capsule-guide skill](skills/capsule-guide/SKILL.md) for every field.
 
 ## Notes
 
