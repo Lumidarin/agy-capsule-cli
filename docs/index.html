@@ -92,11 +92,6 @@
     color: var(--text);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
-  .pill-btn.icon-only {
-    padding: 0 8px;
-    justify-content: center;
-  }
-  .pill-btn svg { display: block; }
 
   .preview-card {
     background: var(--surface);
@@ -263,17 +258,6 @@
 
   <section class="preview-card">
     <div class="preview-bar">
-      <div class="pill-group" role="group" aria-label="Theme">
-        <button class="pill-btn icon-only active" data-theme="light" data-title-i18n="themeLight" title="浅色" aria-label="Light">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-        </button>
-        <button class="pill-btn icon-only" data-theme="both" data-title-i18n="themeBoth" title="日 + 夜" aria-label="Day and Night">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
-        </button>
-        <button class="pill-btn icon-only" data-theme="dark" data-title-i18n="themeDark" title="深色" aria-label="Dark">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-      </div>
       <label class="width-control">
         <span data-i18n="widthLabel">终端宽度</span>
         <input id="width-slider" type="range" min="48" max="120" value="120">
@@ -409,7 +393,6 @@ const SCENARIO_ORDER = ['normal', 'yellow', 'red'];
 const I18N = {
   zh: {
     subtitle: '在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果；调好后复制指令发给 Agent 生效（实际终端字体宽度可能略有差异）。',
-    themeBoth: '日 + 夜', themeLight: '浅色', themeDark: '深色',
     widthLabel: '终端宽度', viewEdit: '编辑', viewPreview: '预览',
     ctxAlert: 'Ctx 提醒', cacheAlert: 'Cache 提醒', quotaAlert: '额度提醒', textColorLabel: '正文颜色',
     optDot: '圆点 ●', optText: '文字', optOff: '关闭',
@@ -423,7 +406,6 @@ const I18N = {
   },
   en: {
     subtitle: 'Click items directly in the statusline to toggle them (dimmed = hidden), switch to Preview to check the final layout, then copy the command for your Agent (terminal font widths may vary).',
-    themeBoth: 'Day + Night', themeLight: 'Light', themeDark: 'Dark',
     widthLabel: 'Width', viewEdit: 'Edit', viewPreview: 'Preview',
     ctxAlert: 'Ctx Alert', cacheAlert: 'Cache Alert', quotaAlert: 'Quota Alert', textColorLabel: 'Body Color',
     optDot: 'Dot ●', optText: 'Text', optOff: 'Off',
@@ -438,7 +420,6 @@ const I18N = {
 };
 
 let lang = 'zh';
-let viewTheme = 'light';
 let viewMode = 'edit';
 let scenarioKey = 'normal';
 let outputTab = 'agent';
@@ -825,9 +806,8 @@ function syncUI() {
   });
 
   const sc = SCENARIOS[scenarioKey];
-  const themes = viewTheme === 'both' ? ['light', 'dark'] : [viewTheme];
   const container = document.getElementById('terminals');
-  container.innerHTML = themes.map(th => {
+  container.innerHTML = ['light', 'dark'].map(th => {
     const row2 = viewMode === 'edit'
       ? renderEditRowHtml(sc.payload, sc.ageSec, th)
       : renderPreviewRowHtml(sc.payload, sc.ageSec, th);
@@ -853,14 +833,6 @@ document.querySelectorAll('[data-lang]').forEach(btn => {
     lang = btn.dataset.lang;
     document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('active', b === btn));
     applyI18n();
-    syncUI();
-  });
-});
-
-document.querySelectorAll('[data-theme]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    viewTheme = btn.dataset.theme;
-    document.querySelectorAll('[data-theme]').forEach(b => b.classList.toggle('active', b === btn));
     syncUI();
   });
 });
