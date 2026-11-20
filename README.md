@@ -2,11 +2,11 @@
 
 **中文** | [English](./README.en.md)
 
-给 Antigravity CLI (`agy`) 的 statusline，**每一项都能自己定**：显示什么、隐藏什么、用什么颜色，全部可自定义。
+给 Antigravity CLI (`agy`) 的 statusline，**高度自定义**。
 
 ![浅色与深色预览](docs/preview.png)
 
-## 👉 [打开在线配置器，调好发给 Agent 即可生效](https://lumidarin.github.io/agy-capsule-cli/)
+👉 [打开在线配置器，调好发给 Agent 即可生效](https://lumidarin.github.io/agy-capsule-cli/)
 
 ## 安装
 
