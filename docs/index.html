@@ -41,6 +41,24 @@
   }
   h1 { margin: 0 0 4px; font-size: 23px; letter-spacing: -0.02em; }
   .subtitle { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .header-right { display: inline-flex; align-items: center; gap: 8px; }
+  .gh-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ctrl-h);
+    height: var(--ctrl-h);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--muted);
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .gh-link:hover {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
 
   .pill-group {
     display: inline-flex;
@@ -228,11 +246,6 @@
     color: #86efac;
   }
   .output-hint { margin: 9px 0 0; font-size: 12.5px; color: var(--muted); }
-  footer {
-    margin-top: 18px;
-    font-size: 12.5px;
-    color: var(--muted);
-  }
 </style>
 </head>
 <body>
@@ -240,11 +253,16 @@
   <header>
     <div>
       <h1>Capsule CLI Configurator</h1>
-      <p class="subtitle" data-i18n="subtitle">在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果。调好后复制指令发给 Agent 生效。</p>
+      <p class="subtitle" data-i18n="subtitle">在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果；调好后复制指令发给 Agent 生效（实际终端字体宽度可能略有差异）。</p>
     </div>
-    <div class="pill-group" role="group" aria-label="Language">
-      <button class="pill-btn active" data-lang="zh">中文</button>
-      <button class="pill-btn" data-lang="en">EN</button>
+    <div class="header-right">
+      <a class="gh-link" href="https://github.com/Lumidarin/agy-capsule-cli" target="_blank" rel="noreferrer" title="GitHub" aria-label="GitHub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      </a>
+      <div class="pill-group" role="group" aria-label="Language">
+        <button class="pill-btn active" data-lang="zh">中文</button>
+        <button class="pill-btn" data-lang="en">EN</button>
+      </div>
     </div>
   </header>
 
@@ -331,10 +349,6 @@
     </div>
     <p class="output-hint" id="output-hint"></p>
   </section>
-
-  <footer>
-    <span data-i18n="footerNote">实际终端字体宽度可能略有差异。</span>
-  </footer>
 </div>
 
 <script>
@@ -407,7 +421,7 @@ const SCENARIOS = {
 
 const I18N = {
   zh: {
-    subtitle: '在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果。调好后复制指令发给 Agent 生效。',
+    subtitle: '在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果；调好后复制指令发给 Agent 生效（实际终端字体宽度可能略有差异）。',
     themeBoth: '日 + 夜', themeLight: '浅色', themeDark: '深色',
     scNormal: '正常', scYellow: '黄提醒', scRed: '红告警',
     widthLabel: '终端宽度', viewEdit: '编辑', viewPreview: '预览',
@@ -420,10 +434,9 @@ const I18N = {
     hintCli: '在 PowerShell / bash / zsh 中运行即可，无需消耗模型调用；下一次底栏刷新生效。',
     hintJson: '保存到 ~/.gemini/config/agy-capsule/cli/settings.json；下一次底栏刷新生效。',
     emptyLine: '（第 2 行所有指标均已隐藏，仅保留第 1 行模型提示）',
-    footerNote: '实际终端字体宽度可能略有差异。',
   },
   en: {
-    subtitle: 'Click items directly in the statusline to toggle them (dimmed = hidden), switch to Preview to check the final layout, then copy the command for your Agent.',
+    subtitle: 'Click items directly in the statusline to toggle them (dimmed = hidden), switch to Preview to check the final layout, then copy the command for your Agent (terminal font widths may vary).',
     themeBoth: 'Day + Night', themeLight: 'Light', themeDark: 'Dark',
     scNormal: 'Normal', scYellow: 'Yellow', scRed: 'Red',
     widthLabel: 'Width', viewEdit: 'Edit', viewPreview: 'Preview',
@@ -436,7 +449,6 @@ const I18N = {
     hintCli: 'Run directly in PowerShell, bash, or zsh with zero model calls. Applies on the next statusline refresh.',
     hintJson: 'Save to ~/.gemini/config/agy-capsule/cli/settings.json. Applies on the next statusline refresh.',
     emptyLine: '(All row-2 metrics hidden; only row-1 model bar is rendered)',
-    footerNote: 'Terminal font widths may vary.',
   },
 };
 
