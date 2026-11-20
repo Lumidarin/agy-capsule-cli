@@ -126,17 +126,6 @@
   }
   .terminal.light { background: #faf9f6; color: #161616; border-color: #dcd7ce; }
   .terminal.dark { background: #282c34; color: #f1f3f5; border-color: #3e4451; }
-  .terminal-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    margin-bottom: 8px;
-    opacity: 0.62;
-  }
-  .terminal-tag { text-transform: uppercase; }
   .terminal pre {
     margin: 0;
     font: 14.5px/1.75 var(--mono);
@@ -251,7 +240,7 @@
   <header>
     <div>
       <h1>Capsule CLI Configurator</h1>
-      <p class="subtitle" data-i18n="subtitle">在预览中直接点击各项开关显示，调好后复制指令发给 Agent 生效。</p>
+      <p class="subtitle" data-i18n="subtitle">在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果。调好后复制指令发给 Agent 生效。</p>
     </div>
     <div class="pill-group" role="group" aria-label="Language">
       <button class="pill-btn active" data-lang="zh">中文</button>
@@ -418,11 +407,10 @@ const SCENARIOS = {
 
 const I18N = {
   zh: {
-    subtitle: '在预览中直接点击各项开关显示，调好后复制指令发给 Agent 生效。',
+    subtitle: '在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果。调好后复制指令发给 Agent 生效。',
     themeBoth: '日 + 夜', themeLight: '浅色', themeDark: '深色',
     scNormal: '正常', scYellow: '黄提醒', scRed: '红告警',
     widthLabel: '终端宽度', viewEdit: '编辑', viewPreview: '预览',
-    editHint: '点击任意项开关显示（暗淡 = 已隐藏）',
     ctxAlert: 'Ctx 提醒', cacheAlert: 'Cache 提醒', quotaAlert: '额度提醒', textColorLabel: '正文颜色',
     optDot: '圆点 ●', optText: '文字', optOff: '关闭',
     tcInherit: '跟随正文', tcFixed: '固定黑白', tcMuted: '柔和灰',
@@ -431,16 +419,14 @@ const I18N = {
     hintAgent: '直接粘贴到 Antigravity 对话中发送，已安装 /capsule-guide skill 的 Agent 会自动调用本地 helper 生效。',
     hintCli: '在 PowerShell / bash / zsh 中运行即可，无需消耗模型调用；下一次底栏刷新生效。',
     hintJson: '保存到 ~/.gemini/config/agy-capsule/cli/settings.json；下一次底栏刷新生效。',
-    dayTag: 'Day / 浅色背景', nightTag: 'Night / 深色背景',
     emptyLine: '（第 2 行所有指标均已隐藏，仅保留第 1 行模型提示）',
     footerNote: '实际终端字体宽度可能略有差异。',
   },
   en: {
-    subtitle: 'Click items directly in the statusline to toggle them, then copy one command for your Agent.',
+    subtitle: 'Click items directly in the statusline to toggle them (dimmed = hidden), switch to Preview to check the final layout, then copy the command for your Agent.',
     themeBoth: 'Day + Night', themeLight: 'Light', themeDark: 'Dark',
     scNormal: 'Normal', scYellow: 'Yellow', scRed: 'Red',
     widthLabel: 'Width', viewEdit: 'Edit', viewPreview: 'Preview',
-    editHint: 'Click any item to toggle (dimmed = hidden)',
     ctxAlert: 'Ctx Alert', cacheAlert: 'Cache Alert', quotaAlert: 'Quota Alert', textColorLabel: 'Body Color',
     optDot: 'Dot ●', optText: 'Text', optOff: 'Off',
     tcInherit: 'Follow Body', tcFixed: 'Fixed B/W', tcMuted: 'Muted Gray',
@@ -449,7 +435,6 @@ const I18N = {
     hintAgent: 'Paste directly into Antigravity chat. With /capsule-guide installed, your agent applies it via the local helper.',
     hintCli: 'Run directly in PowerShell, bash, or zsh with zero model calls. Applies on the next statusline refresh.',
     hintJson: 'Save to ~/.gemini/config/agy-capsule/cli/settings.json. Applies on the next statusline refresh.',
-    dayTag: 'Day / Light background', nightTag: 'Night / Dark background',
     emptyLine: '(All row-2 metrics hidden; only row-1 model bar is rendered)',
     footerNote: 'Terminal font widths may vary.',
   },
@@ -808,12 +793,10 @@ function syncUI() {
   const themes = viewTheme === 'both' ? ['light', 'dark'] : [viewTheme];
   const container = document.getElementById('terminals');
   container.innerHTML = themes.map(th => {
-    const tag = th === 'light' ? I18N[lang].dayTag : I18N[lang].nightTag;
-    const hint = viewMode === 'edit' ? `<span>${esc(I18N[lang].editHint)}</span>` : '';
     const row2 = viewMode === 'edit'
       ? renderEditRowHtml(sc.payload, sc.ageSec, th)
       : renderPreviewRowHtml(sc.payload, sc.ageSec, th);
-    return `<div class="terminal ${th}"><div class="terminal-head"><span class="terminal-tag">${esc(tag)}</span>${hint}</div><pre>${renderModelLineHtml(sc.payload, th)}\n${row2}</pre></div>`;
+    return `<div class="terminal ${th}"><pre>${renderModelLineHtml(sc.payload, th)}\n${row2}</pre></div>`;
   }).join('');
 
   container.querySelectorAll('.tok[data-show]').forEach(el => {
