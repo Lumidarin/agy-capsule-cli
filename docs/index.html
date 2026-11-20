@@ -74,6 +74,11 @@
     color: var(--text);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
+  .pill-btn.icon-only {
+    padding: 0 8px;
+    justify-content: center;
+  }
+  .pill-btn svg { display: block; }
 
   .preview-card {
     background: var(--surface);
@@ -261,15 +266,19 @@
           <button class="pill-btn active" data-scenario="normal" data-i18n="scNormal">正常</button>
           <button class="pill-btn" data-scenario="yellow" data-i18n="scYellow">黄提醒</button>
           <button class="pill-btn" data-scenario="red" data-i18n="scRed">红告警</button>
-          <button class="pill-btn" data-scenario="claude">Claude</button>
-          <button class="pill-btn" data-scenario="argon">Argon</button>
         </div>
       </div>
       <div class="preview-bar-right">
         <div class="pill-group" role="group" aria-label="Theme">
-          <button class="pill-btn" data-theme="both" data-i18n="themeBoth">日 + 夜</button>
-          <button class="pill-btn" data-theme="light" data-i18n="themeLight">浅色</button>
-          <button class="pill-btn active" data-theme="dark" data-i18n="themeDark">深色</button>
+          <button class="pill-btn icon-only" data-theme="light" data-title-i18n="themeLight" title="浅色" aria-label="Light">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          </button>
+          <button class="pill-btn icon-only" data-theme="both" data-title-i18n="themeBoth" title="日 + 夜" aria-label="Day and Night">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+          </button>
+          <button class="pill-btn icon-only active" data-theme="dark" data-title-i18n="themeDark" title="深色" aria-label="Dark">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
         </div>
         <label class="width-control">
           <span data-i18n="widthLabel">终端宽度</span>
@@ -403,24 +412,6 @@ const SCENARIOS = {
       agent_state: 'idle',
       context_window: { used_percentage: 90.0, context_window_size: 1048576, current_usage: { input_tokens: 160, cache_read_input_tokens: 9840 } },
       quota: { 'gemini-5h': { remaining_fraction: 0.96, reset_in_seconds: 8760 }, 'gemini-weekly': { remaining_fraction: 0.10, reset_in_seconds: 342000 } },
-    },
-  },
-  claude: {
-    ageSec: 90,
-    payload: {
-      model: { id: 'claude-sonnet-4-6', display_name: 'Claude Sonnet 4.6', effort: 'high' },
-      agent_state: 'idle',
-      context_window: { used_percentage: 28.4, context_window_size: 200000, current_usage: { input_tokens: 640, cache_read_input_tokens: 9360 } },
-      quota: { '3p-5h': { remaining_fraction: 0.64, reset_in_seconds: 6300 }, '3p-weekly': { remaining_fraction: 0.32, reset_in_seconds: 288000 } },
-    },
-  },
-  argon: {
-    ageSec: 60,
-    payload: {
-      model: { id: 'gemini-argon', display_name: 'Gemini 4 Argon', effort: 'high' },
-      agent_state: 'idle',
-      context_window: { used_percentage: 36.1, context_window_size: 1048576, current_usage: { input_tokens: 420, cache_read_input_tokens: 9580 } },
-      quota: { 'gemini-argon-wtu-weekly': { remaining_fraction: 0.16, reset_in_seconds: 346122 } },
     },
   },
 };
@@ -797,6 +788,10 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-title-i18n]').forEach(el => {
+    const key = el.dataset.titleI18n;
+    if (t[key]) { el.title = t[key]; el.setAttribute('aria-label', t[key]); }
   });
   updateCopyButtonLabel(false);
 }
