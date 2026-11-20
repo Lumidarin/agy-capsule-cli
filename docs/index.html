@@ -109,16 +109,10 @@
   .preview-bar {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .preview-bar-left, .preview-bar-right {
-    display: flex;
-    flex-wrap: wrap;
+    justify-content: flex-end;
     align-items: center;
     gap: 8px;
+    margin-bottom: 12px;
   }
   .width-control {
     display: inline-flex;
@@ -149,6 +143,7 @@
     font: 14.5px/1.75 var(--mono);
     white-space: pre;
   }
+  .terminal pre span { transition: color .65s ease, opacity .14s, background .14s; }
   .terminal pre .empty-hint { opacity: 0.5; font-style: italic; }
 
   /* Direct-manipulation clickable tokens in Edit mode */
@@ -268,34 +263,25 @@
 
   <section class="preview-card">
     <div class="preview-bar">
-      <div class="preview-bar-left">
-        <div class="pill-group" id="scenario-pills">
-          <button class="pill-btn active" data-scenario="normal" data-i18n="scNormal">正常</button>
-          <button class="pill-btn" data-scenario="yellow" data-i18n="scYellow">黄提醒</button>
-          <button class="pill-btn" data-scenario="red" data-i18n="scRed">红告警</button>
-        </div>
+      <div class="pill-group" role="group" aria-label="Theme">
+        <button class="pill-btn icon-only active" data-theme="light" data-title-i18n="themeLight" title="浅色" aria-label="Light">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+        <button class="pill-btn icon-only" data-theme="both" data-title-i18n="themeBoth" title="日 + 夜" aria-label="Day and Night">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+        </button>
+        <button class="pill-btn icon-only" data-theme="dark" data-title-i18n="themeDark" title="深色" aria-label="Dark">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
       </div>
-      <div class="preview-bar-right">
-        <div class="pill-group" role="group" aria-label="Theme">
-          <button class="pill-btn icon-only active" data-theme="light" data-title-i18n="themeLight" title="浅色" aria-label="Light">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          </button>
-          <button class="pill-btn icon-only" data-theme="both" data-title-i18n="themeBoth" title="日 + 夜" aria-label="Day and Night">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
-          </button>
-          <button class="pill-btn icon-only" data-theme="dark" data-title-i18n="themeDark" title="深色" aria-label="Dark">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          </button>
-        </div>
-        <label class="width-control">
-          <span data-i18n="widthLabel">终端宽度</span>
-          <input id="width-slider" type="range" min="48" max="120" value="120">
-          <span class="width-val" id="width-val">120</span>
-        </label>
-        <div class="pill-group" role="group" aria-label="View mode">
-          <button class="pill-btn active" data-view="edit" data-i18n="viewEdit">编辑</button>
-          <button class="pill-btn" data-view="preview" data-i18n="viewPreview">预览</button>
-        </div>
+      <label class="width-control">
+        <span data-i18n="widthLabel">终端宽度</span>
+        <input id="width-slider" type="range" min="48" max="120" value="120">
+        <span class="width-val" id="width-val">120</span>
+      </label>
+      <div class="pill-group" role="group" aria-label="View mode">
+        <button class="pill-btn active" data-view="edit" data-i18n="viewEdit">编辑</button>
+        <button class="pill-btn" data-view="preview" data-i18n="viewPreview">预览</button>
       </div>
     </div>
     <div class="terminals" id="terminals"></div>
@@ -411,19 +397,19 @@ const SCENARIOS = {
   red: {
     ageSec: 240,
     payload: {
-      model: { id: 'gemini-hydrogen', display_name: 'Gemini 4 Hydrogen', effort: 'high' },
+      model: { id: 'gemini-hydrogen', display_name: 'Gemini 4 Hydrogen', effort: 'medium' },
       agent_state: 'idle',
       context_window: { used_percentage: 90.0, context_window_size: 1048576, current_usage: { input_tokens: 160, cache_read_input_tokens: 9840 } },
       quota: { 'gemini-5h': { remaining_fraction: 0.96, reset_in_seconds: 8760 }, 'gemini-weekly': { remaining_fraction: 0.10, reset_in_seconds: 342000 } },
     },
   },
 };
+const SCENARIO_ORDER = ['normal', 'yellow', 'red'];
 
 const I18N = {
   zh: {
     subtitle: '在预览中直接点击各项开关显示，暗淡表示隐藏，切换「预览」看效果；调好后复制指令发给 Agent 生效（实际终端字体宽度可能略有差异）。',
     themeBoth: '日 + 夜', themeLight: '浅色', themeDark: '深色',
-    scNormal: '正常', scYellow: '黄提醒', scRed: '红告警',
     widthLabel: '终端宽度', viewEdit: '编辑', viewPreview: '预览',
     ctxAlert: 'Ctx 提醒', cacheAlert: 'Cache 提醒', quotaAlert: '额度提醒', textColorLabel: '正文颜色',
     optDot: '圆点 ●', optText: '文字', optOff: '关闭',
@@ -438,7 +424,6 @@ const I18N = {
   en: {
     subtitle: 'Click items directly in the statusline to toggle them (dimmed = hidden), switch to Preview to check the final layout, then copy the command for your Agent (terminal font widths may vary).',
     themeBoth: 'Day + Night', themeLight: 'Light', themeDark: 'Dark',
-    scNormal: 'Normal', scYellow: 'Yellow', scRed: 'Red',
     widthLabel: 'Width', viewEdit: 'Edit', viewPreview: 'Preview',
     ctxAlert: 'Ctx Alert', cacheAlert: 'Cache Alert', quotaAlert: 'Quota Alert', textColorLabel: 'Body Color',
     optDot: 'Dot ●', optText: 'Text', optOff: 'Off',
@@ -462,6 +447,7 @@ const state = structuredClone(DEFAULTS);
 
 const esc = s => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const span = (text, tone, theme) => `<span style="color:${PALETTES[theme][tone]}">${esc(text)}</span>`;
+const slot = (name, text, color) => `<span data-slot="${name}"${color ? ` style="color:${color}"` : ''}>${esc(text)}</span>`;
 function charWidth(ch) {
   const cp = ch.codePointAt(0);
   if (cp > 0xffff) return 2;
@@ -525,30 +511,44 @@ function tok(key, html, on) {
   return `<span class="tok ${on ? 'on' : 'off'}" data-show="${key}">${html}</span>`;
 }
 
+function scenarioColors(payload, ageSec, theme) {
+  const ctxPct = payload.context_window.used_percentage;
+  const ctxColor = state.context === 'text' && ctxPct >= 75
+    ? PALETTES[theme][ctxPct >= 90 ? 'red' : 'amber'] : '';
+  const cacheTone = ageSec >= 240 ? 'red' : ageSec >= 180 ? 'amber' : 'neutral';
+  const cacheTextColor = state.cache === 'text' && cacheTone !== 'neutral' ? PALETTES[theme][cacheTone] : '';
+  const cacheDotColor = PALETTES[theme][cacheTone];
+  const quotaDotColor = PALETTES[theme][quotaTone(payload, state.show)];
+  const p5h = Math.round(payload.quota['gemini-5h'].remaining_fraction * 100);
+  const pw = Math.round(payload.quota['gemini-weekly'].remaining_fraction * 100);
+  const q5hColor = state.quota === 'text' && p5h <= 25 ? PALETTES[theme][p5h <= 10 ? 'red' : 'amber'] : '';
+  const qwColor = state.quota === 'text' && pw <= 25 ? PALETTES[theme][pw <= 10 ? 'red' : 'amber'] : '';
+  return {
+    ctxText: `${ctxPct.toFixed(1)}%`, ctxColor,
+    cacheTextColor, cacheDotColor, quotaDotColor,
+    q5hText: `${p5h}%`, q5hColor,
+    qwText: `${pw}%`, qwColor,
+  };
+}
+
 function renderEditRowHtml(payload, ageSec, theme) {
   const { show } = state;
   const width = Math.max(1, termWidth - 2);
   const ctx = payload.context_window;
-  const pct = `${ctx.used_percentage.toFixed(1)}%`;
+  const c = scenarioColors(payload, ageSec, theme);
   const cap = `(${formatTokens(ctx.context_window_size)})`;
   const u = ctx.current_usage;
   const hit = `${(u.cache_read_input_tokens / (u.input_tokens + u.cache_read_input_tokens) * 100).toFixed(1)}%`;
-  const cacheTone = ageSec >= 240 ? 'red' : ageSec >= 180 ? 'amber' : 'neutral';
 
-  const pctHtml = state.context === 'text' && ctx.used_percentage >= 75
-    ? span(pct, ctx.used_percentage >= 90 ? 'red' : 'amber', theme) : esc(pct);
-  const ctxPlain = `Ctx ${pct} ${cap}`;
-  const ctxHtml = `${tok('contextLabel', 'Ctx', show.contextLabel)} ${tok('context', pctHtml, show.context)} ${tok('capacity', esc(cap), show.capacity)}`;
+  const ctxPlain = `Ctx ${c.ctxText} ${cap}`;
+  const ctxHtml = `${tok('contextLabel', 'Ctx', show.contextLabel)} ${tok('context', slot('ctx', c.ctxText, c.ctxColor), show.context)} ${tok('capacity', esc(cap), show.capacity)}`;
 
-  const cacheTextColor = state.cache === 'text' && cacheTone !== 'neutral';
-  const cacheLabelHtml = cacheTextColor ? span('Cache', cacheTone, theme) : 'Cache';
-  const cacheHitHtml = cacheTextColor ? span(hit, cacheTone, theme) : esc(hit);
   const cacheActive = show.cache || show.cacheLabel;
   const cacheDotPlain = state.cache === 'dot' ? ' ●' : '';
   const cacheDotHtml = state.cache === 'dot'
-    ? ` <span style="opacity:${cacheActive ? 1 : 0.25}">${span('●', cacheTone, theme)}</span>` : '';
+    ? ` <span style="opacity:${cacheActive ? 1 : 0.25}">${slot('cacheDot', '●', c.cacheDotColor)}</span>` : '';
   const cachePlain = `Cache ${hit}${cacheDotPlain}`;
-  const cacheHtml = `${tok('cacheLabel', cacheLabelHtml, show.cacheLabel)} ${tok('cache', cacheHitHtml, show.cache)}${cacheDotHtml}`;
+  const cacheHtml = `${tok('cacheLabel', slot('cacheText', 'Cache', c.cacheTextColor), show.cacheLabel)} ${tok('cache', slot('cacheText', hit, c.cacheTextColor), show.cache)}${cacheDotHtml}`;
 
   const leftPlain = `${ctxPlain}  ${cachePlain}`;
   const leftHtml = `${ctxHtml}  ${cacheHtml}`;
@@ -559,7 +559,7 @@ function renderEditRowHtml(payload, ageSec, theme) {
   const anyRightOn = show.quotaGroup || show.quota5hIcon || show.quota5h || show.reset5h || show.quotaWeeklyIcon || show.quotaWeekly || show.resetWeekly;
   if (state.quota === 'dot') {
     rightPlainParts.push('●');
-    rightHtmlParts.push(`<span style="opacity:${anyRightOn ? 1 : 0.25}">${span('●', quotaTone(payload, show), theme)}</span>`);
+    rightHtmlParts.push(`<span style="opacity:${anyRightOn ? 1 : 0.25}">${slot('quotaDot', '●', c.quotaDotColor)}</span>`);
   }
   rightPlainParts.push(selected);
   rightHtmlParts.push(tok('quotaGroup', esc(selected), show.quotaGroup));
@@ -568,23 +568,19 @@ function renderEditRowHtml(payload, ageSec, theme) {
     const meta = KNOWN_BUCKETS[id];
     if (!meta || meta[0] !== selected || bucket.disabled) continue;
     const kind = meta[1];
-    const pctNum = Math.round(bucket.remaining_fraction * 100);
-    const valStr = `${pctNum}%`;
-    const valHtml = state.quota === 'text' && pctNum <= 25
-      ? span(valStr, pctNum <= 10 ? 'red' : 'amber', theme) : esc(valStr);
     const rt = resetText(bucket);
     if (kind === '5h') {
-      rightPlainParts.push('🕔', valStr, rt);
+      rightPlainParts.push('🕔', c.q5hText, rt);
       rightHtmlParts.push(
         tok('quota5hIcon', '🕔', show.quota5hIcon),
-        tok('quota5h', valHtml, show.quota5h),
+        tok('quota5h', slot('q5h', c.q5hText, c.q5hColor), show.quota5h),
         tok('reset5h', esc(rt), show.reset5h),
       );
     } else if (kind === 'weekly') {
-      rightPlainParts.push('📅', valStr, rt);
+      rightPlainParts.push('📅', c.qwText, rt);
       rightHtmlParts.push(
         tok('quotaWeeklyIcon', '📅', show.quotaWeeklyIcon),
-        tok('quotaWeekly', valHtml, show.quotaWeekly),
+        tok('quotaWeekly', slot('qw', c.qwText, c.qwColor), show.quotaWeekly),
         tok('resetWeekly', esc(rt), show.resetWeekly),
       );
     }
@@ -601,7 +597,7 @@ function renderPreviewRowHtml(payload, ageSec, theme) {
   const { show } = state;
   const width = Math.max(1, termWidth - 2);
   const ctx = payload.context_window;
-  const pct = `${ctx.used_percentage.toFixed(1)}%`;
+  const c = scenarioColors(payload, ageSec, theme);
   const cap = `(${formatTokens(ctx.context_window_size)})`;
   const u = ctx.current_usage;
   const cacheHit = u && width >= 30
@@ -610,7 +606,7 @@ function renderPreviewRowHtml(payload, ageSec, theme) {
   const buildLeft = (opts) => {
     const ctxParts = [];
     if (opts.withContext && show.contextLabel) ctxParts.push(opts.shortContext ? 'C' : 'Ctx');
-    if (opts.withContext && show.context) ctxParts.push(pct);
+    if (opts.withContext && show.context) ctxParts.push(c.ctxText);
     if (opts.withCapacity && show.capacity) ctxParts.push(cap);
     const cacheParts = [];
     if (opts.withCache && cacheHit !== null) {
@@ -631,15 +627,14 @@ function renderPreviewRowHtml(payload, ageSec, theme) {
       const meta = KNOWN_BUCKETS[id];
       if (!meta || meta[0] !== selected || bucket.disabled) continue;
       const kind = meta[1];
-      const val = `${Math.round(bucket.remaining_fraction * 100)}%`;
       const bp = [];
       if (kind === '5h') {
         if (show.quota5hIcon) bp.push('🕔');
-        if (show.quota5h) bp.push(val);
+        if (show.quota5h) bp.push(c.q5hText);
         if (countdown && show.reset5h) bp.push(resetText(bucket));
       } else if (kind === 'weekly') {
         if (show.quotaWeeklyIcon) bp.push('📅');
-        if (show.quotaWeekly) bp.push(val);
+        if (show.quotaWeekly) bp.push(c.qwText);
         if (countdown && show.resetWeekly) bp.push(resetText(bucket));
       }
       if (bp.length) parts.push(bp.join(' '));
@@ -651,14 +646,17 @@ function renderPreviewRowHtml(payload, ageSec, theme) {
   let leftOpts = { withContext: true, withCapacity: true, withCache: true, shortContext: false };
   let left = buildLeft(leftOpts);
   let right = buildRight(width >= 70, show.quotaGroup);
+  let rightCountdown = width >= 70;
+  let rightShowName = show.quotaGroup;
   const fits = () => displayWidth(left) + (left && right ? 2 : 0) + displayWidth(right) <= width;
 
-  if (!fits()) right = buildRight(false, show.quotaGroup);
+  if (!fits()) { rightCountdown = false; right = buildRight(false, show.quotaGroup); }
   if (!fits() && (show.context || show.contextLabel || show.capacity)) { leftOpts = { ...leftOpts, withCache: false }; left = buildLeft(leftOpts); }
   if (!fits() && (show.context || show.contextLabel)) { leftOpts = { ...leftOpts, withCapacity: false }; left = buildLeft(leftOpts); }
-  if (!fits()) right = buildRight(false, false);
-  let leftClipped = false;
+  if (!fits()) { rightShowName = false; right = buildRight(false, false); }
+  let clipped = false;
   if (!fits()) {
+    clipped = true;
     if (right) {
       leftOpts = { withContext: width >= 12 && (show.context || show.contextLabel), withCapacity: false, withCache: false, shortContext: true };
       left = buildLeft(leftOpts);
@@ -667,21 +665,17 @@ function renderPreviewRowHtml(payload, ageSec, theme) {
     } else {
       leftOpts = { ...leftOpts, withCache: (show.context || show.contextLabel) ? false : leftOpts.withCache, shortContext: true };
       left = buildLeft(leftOpts);
-      if (!fits()) { left = clipText(left, width); leftClipped = true; }
+      if (!fits()) left = clipText(left, width);
     }
   }
   if (!left && !right) return `<span class="empty-hint">${esc(I18N[lang].emptyLine)}</span>`;
 
   const padding = right ? ' '.repeat(Math.max(0, width - displayWidth(left) - displayWidth(right))) : '';
-  const cacheTone = ageSec >= 240 ? 'red' : ageSec >= 180 ? 'amber' : 'neutral';
   let leftHtml = esc(left);
-  if (left && !leftClipped) {
+  if (left && !clipped) {
     const ctxParts = [];
     if (leftOpts.withContext && show.contextLabel) ctxParts.push(leftOpts.shortContext ? 'C' : 'Ctx');
-    if (leftOpts.withContext && show.context) {
-      ctxParts.push(state.context === 'text' && ctx.used_percentage >= 75
-        ? span(pct, ctx.used_percentage >= 90 ? 'red' : 'amber', theme) : esc(pct));
-    }
+    if (leftOpts.withContext && show.context) ctxParts.push(slot('ctx', c.ctxText, c.ctxColor));
     if (leftOpts.withCapacity && show.capacity) ctxParts.push(esc(cap));
     let cacheHtml = '';
     if (leftOpts.withCache && cacheHit !== null) {
@@ -690,23 +684,52 @@ function renderPreviewRowHtml(payload, ageSec, theme) {
       if (show.cache) cp.push(cacheHit);
       if (cp.length) {
         const raw = cp.join(' ');
-        if (state.cache === 'dot') cacheHtml = `${esc(raw)} ${span('●', cacheTone, theme)}`;
-        else if (state.cache === 'text' && cacheTone !== 'neutral') cacheHtml = span(raw, cacheTone, theme);
-        else cacheHtml = esc(raw);
+        if (state.cache === 'dot') cacheHtml = `${esc(raw)} ${slot('cacheDot', '●', c.cacheDotColor)}`;
+        else cacheHtml = slot('cacheText', raw, c.cacheTextColor);
       }
     }
     leftHtml = [ctxParts.join(' '), cacheHtml].filter(Boolean).join('  ');
   }
   let rightHtml = esc(right);
-  if (right) {
-    if (state.quota === 'dot') rightHtml = rightHtml.replace('●', span('●', quotaTone(payload, show), theme));
-    else if (state.quota === 'text') {
-      rightHtml = rightHtml.replace(/\b(\d+)%/g, (m, p) => Number(p) <= 25 ? span(m, Number(p) <= 10 ? 'red' : 'amber', theme) : m);
+  if (right && !clipped) {
+    const selected = currentGroup(payload.model, payload.quota);
+    const parts = [];
+    for (const [id, bucket] of Object.entries(payload.quota)) {
+      const meta = KNOWN_BUCKETS[id];
+      if (!meta || meta[0] !== selected || bucket.disabled) continue;
+      const kind = meta[1];
+      const bp = [];
+      if (kind === '5h') {
+        if (show.quota5hIcon) bp.push('🕔');
+        if (show.quota5h) bp.push(slot('q5h', c.q5hText, c.q5hColor));
+        if (rightCountdown && show.reset5h) bp.push(esc(resetText(bucket)));
+      } else if (kind === 'weekly') {
+        if (show.quotaWeeklyIcon) bp.push('📅');
+        if (show.quotaWeekly) bp.push(slot('qw', c.qwText, c.qwColor));
+        if (rightCountdown && show.resetWeekly) bp.push(esc(resetText(bucket)));
+      }
+      if (bp.length) parts.push(bp.join(' '));
     }
+    const body = [rightShowName ? esc(selected) : '', ...parts].filter(Boolean).join(' ');
+    rightHtml = body ? `${state.quota === 'dot' ? slot('quotaDot', '●', c.quotaDotColor) + ' ' : ''}${body}` : '';
   }
   const baseColor = state.textColor === 'fixed' ? PALETTES[theme].body : state.textColor === 'muted' ? PALETTES[theme].muted : null;
   const rowHtml = leftHtml + padding + rightHtml;
   return baseColor ? `<span style="color:${baseColor}">${rowHtml}</span>` : rowHtml;
+}
+
+function updateScenarioInPlace() {
+  const sc = SCENARIOS[scenarioKey];
+  document.querySelectorAll('#terminals .terminal').forEach(el => {
+    const theme = el.classList.contains('dark') ? 'dark' : 'light';
+    const c = scenarioColors(sc.payload, sc.ageSec, theme);
+    el.querySelectorAll('[data-slot="ctx"]').forEach(n => { n.textContent = c.ctxText; n.style.color = c.ctxColor; });
+    el.querySelectorAll('[data-slot="cacheText"]').forEach(n => { n.style.color = c.cacheTextColor; });
+    el.querySelectorAll('[data-slot="cacheDot"]').forEach(n => { n.style.color = c.cacheDotColor; });
+    el.querySelectorAll('[data-slot="quotaDot"]').forEach(n => { n.style.color = c.quotaDotColor; });
+    el.querySelectorAll('[data-slot="q5h"]').forEach(n => { n.textContent = c.q5hText; n.style.color = c.q5hColor; });
+    el.querySelectorAll('[data-slot="qw"]').forEach(n => { n.textContent = c.qwText; n.style.color = c.qwColor; });
+  });
 }
 
 function diffCount(modeName) {
@@ -850,14 +873,6 @@ document.querySelectorAll('[data-view]').forEach(btn => {
   });
 });
 
-document.querySelectorAll('#scenario-pills [data-scenario]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    scenarioKey = btn.dataset.scenario;
-    document.querySelectorAll('#scenario-pills [data-scenario]').forEach(b => b.classList.toggle('active', b === btn));
-    syncUI();
-  });
-});
-
 document.getElementById('width-slider').addEventListener('input', e => {
   termWidth = Number(e.target.value);
   document.getElementById('width-val').textContent = String(termWidth);
@@ -902,6 +917,13 @@ document.getElementById('copy-btn').addEventListener('click', async () => {
 
 applyI18n();
 syncUI();
+
+// Smoothly cycle normal -> yellow -> red every 3s in-place so colors crossfade cleanly.
+setInterval(() => {
+  const nextIdx = (SCENARIO_ORDER.indexOf(scenarioKey) + 1) % SCENARIO_ORDER.length;
+  scenarioKey = SCENARIO_ORDER[nextIdx];
+  updateScenarioInPlace();
+}, 3000);
 </script>
 </body>
 </html>
