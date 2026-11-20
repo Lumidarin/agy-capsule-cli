@@ -39,7 +39,7 @@ export const MODE_LABELS = Object.freeze({
 export const SHOW_KEYS = Object.freeze(Object.keys(MODES.standard));
 export const TEXT_LABEL_MODES = Object.freeze(['en', 'zh', 'off']);
 export const QUOTA_LABEL_MODES = Object.freeze(['icon', 'short', 'zh', 'off']);
-export const TEXT_COLOR_MODES = Object.freeze(['inherit', 'muted', 'plain']);
+export const TEXT_COLOR_MODES = Object.freeze(['inherit', 'fixed', 'muted', 'plain']);
 
 export const DEFAULT_SETTINGS = Object.freeze({
   mode: 'standard',
@@ -55,8 +55,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 export const PALETTES = Object.freeze({
-  light: Object.freeze({ muted: [91, 107, 115], neutral: [138, 144, 151], amber: [152, 97, 0], red: [208, 42, 48] }),
-  dark: Object.freeze({ muted: [185, 195, 208], neutral: [185, 195, 208], amber: [255, 209, 102], red: [255, 133, 133] }),
+  light: Object.freeze({ body: [22, 22, 22], muted: [91, 107, 115], neutral: [138, 144, 151], amber: [152, 97, 0], red: [208, 42, 48] }),
+  dark: Object.freeze({ body: [241, 243, 245], muted: [185, 195, 208], neutral: [185, 195, 208], amber: [255, 209, 102], red: [255, 133, 133] }),
 });
 
 export function readTheme({ home = homedir(), platform = process.platform, env = process.env,
@@ -224,7 +224,7 @@ export function renderModelLine(payload, color = false, theme = 'light', textCol
   let left = ['working', 'tool_use'].includes(payload?.agent_state) ? 'esc to cancel' : '? for shortcuts';
   if (left.length + 2 + right.length > width) left = '';
   const line = left + ' '.repeat(width - left.length - right.length) + right;
-  return color && textColor === 'muted' ? tint(line, 'muted', theme) : line;
+  return color && textColor !== 'plain' ? tint(line, 'muted', theme) : line;
 }
 
 export function formatTokens(value) {
@@ -277,6 +277,12 @@ function quotaTone(payload, show = MODES.standard) {
 function tint(text, tone, theme = 'light') {
   const rgb = (PALETTES[theme] || PALETTES.light)[tone].join(';');
   return `\x1b[38;2;${rgb}m${text}\x1b[0m`;
+}
+
+function paintBase(text, tone, theme = 'light') {
+  if (!text) return text;
+  const code = `\x1b[38;2;${(PALETTES[theme] || PALETTES.light)[tone].join(';')}m`;
+  return code + text.replaceAll('\x1b[0m', code) + '\x1b[0m';
 }
 
 function quotaGroups(quota, model, now, countdown, showName = true, prefs = DEFAULT_SETTINGS) {
@@ -400,7 +406,7 @@ export function renderStatusline(payload = {}, { now = Date.now(), color = false
   // Compute padding before adding ANSI controls; quota ends at the right edge.
   const padding = right ? ' '.repeat(Math.max(0, width - displayWidth(left) - displayWidth(right))) : '';
   const useColor = color && prefs.textColor !== 'plain';
-  const tintDot = tone => tone !== 'neutral' || prefs.textColor === 'muted' ? tint('●', tone, theme) : '●';
+  const baseTone = prefs.textColor === 'fixed' ? 'body' : prefs.textColor === 'muted' ? 'muted' : null;
   if (useColor) {
     const age = number(lastResponseAtMs) !== null ? now - lastResponseAtMs : null;
     const cacheTone = age !== null && age >= 240000 ? 'red' : age !== null && age >= 180000 ? 'amber' : 'neutral';
@@ -415,17 +421,19 @@ export function renderStatusline(payload = {}, { now = Date.now(), color = false
       }
       if (leftOpts.withCache && cacheBlock) {
         let coloredCache = cacheBlock;
-        if (prefs.cache === 'dot') coloredCache = coloredCache.replace('●', tintDot(cacheTone));
+        if (prefs.cache === 'dot') coloredCache = coloredCache.replace('●', tint('●', cacheTone, theme));
         else if (prefs.cache === 'text' && cacheTone !== 'neutral') coloredCache = tint(coloredCache, cacheTone, theme);
         parts.push(coloredCache);
       }
       let coloredLeft = parts.join('  ');
       if (leftOpts.withState && stateLabel) coloredLeft = coloredLeft ? `${coloredLeft} | ${stateLabel}` : stateLabel;
       if (coloredLeft.replace(/\x1b\[[\d;]+m/g, '') === left) left = coloredLeft;
+      if (baseTone) left = paintBase(left, baseTone, theme);
     }
     if (right) {
-      if (prefs.quota === 'dot') right = right.replace('●', tintDot(quotaTone(p, show)));
+      if (prefs.quota === 'dot') right = right.replace('●', tint('●', quotaTone(p, show), theme));
       else if (prefs.quota === 'text') right = right.replace(/\b(\d+)%/g, (text, percent) => Number(percent) <= 25 ? tint(text, Number(percent) <= 10 ? 'red' : 'amber', theme) : text);
+      if (baseTone) right = paintBase(right, baseTone, theme);
     }
   }
   return left + padding + right;

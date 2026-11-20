@@ -104,7 +104,7 @@ Use `quotaLabel` in CLI commands to set both 5h and weekly prefixes at once.
 
 | Setting | JSON key | Values | Default |
 | --- | --- | --- | --- |
-| Body & model line color | `textColor` | `inherit` (follows active terminal / color scheme foreground), `muted` (soft gray model line & neutral dots), `plain` (no ANSI colors) | `inherit` |
+| Metrics row body color | `textColor` | `inherit` (follows active terminal / color scheme foreground), `fixed` (black on light, white on dark), `muted` (soft gray; alerts stand out), `plain` (no ANSI; row-1 hint bar stays muted otherwise) | `inherit` |
 | Ctx alert | `context` | `text` (colored text), `off` (no color alert) | `text` |
 | Cache alert | `cache` | `text`, `dot` (colored dot), `off` | `dot` |
 | Quota alert | `quota` | `text`, `dot`, `off` | `dot` |

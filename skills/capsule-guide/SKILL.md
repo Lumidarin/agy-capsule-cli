@@ -62,9 +62,11 @@ Switching presets resets per-item `show.*` overrides to that preset while preser
 
 ### 4. Text color (`textColor`)
 
-| Key | `inherit` (default) | `muted` | `plain` |
-| --- | --- | --- | --- |
-| `textColor` | Follows active terminal / color scheme body foreground (only yellow/red alerts add color) | Soft muted gray on model line & neutral dots (day/night adaptive) | No ANSI color codes at all |
+Applies to Row 2 body text (Row 1 shortcut/model bar stays calmly muted unless `plain`):
+
+| Key | `inherit` (default) | `fixed` | `muted` | `plain` |
+| --- | --- | --- | --- | --- |
+| `textColor` | Follows active terminal / color scheme foreground | Fixed black on light, white on dark (ignores colorful schemes) | Soft muted gray on Row 2 (only yellow/red alerts stand out) | No ANSI color codes at all |
 
 ### 5. Alert modes
 

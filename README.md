@@ -108,7 +108,7 @@ Ctx 14.2% (1.0M)  Cache 98.4% ●       ● Gemini 🕔 96% (2h 26m) 📅 19% (3
 
 | 设置项 | JSON key | 可选模式 | 默认 |
 | --- | --- | --- | --- |
-| 正文与模型行颜色 | `textColor` | `inherit` 跟随当前终端／color scheme 正文色（浅色即默认黑）、`muted` 模型行与中性圆点柔灰、`plain` 纯文本无 ANSI | `inherit` |
+| 指标行正文颜色 | `textColor` | `inherit` 跟随当前终端／color scheme 正文色、`fixed` 浅色固定黑／深色固定白（不受彩色主题染色）、`muted` 柔和灰（仅黄／红告警突出）、`plain` 无 ANSI（第 1 行提示栏保持柔灰） | `inherit` |
 | Ctx 提醒 | `context` | `text` 文字变色、`off` 不提醒 | `text` |
 | Cache 提醒 | `cache` | `text`、`dot` 圆点变色、`off` | `dot` |
 | 额度提醒 | `quota` | `text`、`dot`、`off` | `dot` |

@@ -13,11 +13,11 @@
     --border-strong: #c6bfb3;
     --text: #1c1e21;
     --muted: #657077;
-    --accent: #2563eb;
-    --accent-soft: #e6f0ff;
-    --accent-border: #6096fd;
-    --accent-hover: #1d4ed8;
-    --ok: #15803d;
+    --accent: #4c626b;
+    --accent-soft: #e5ecef;
+    --accent-border: #8fa3ac;
+    --accent-hover: #354850;
+    --ok: #2e7d52;
     --radius: 12px;
     --mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'SFMono-Regular', Menlo, monospace;
   }
@@ -134,20 +134,18 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px 18px 18px;
+    padding: 16px 18px;
     margin-bottom: 14px;
   }
-  .controls-top {
+  .controls-bottom {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     gap: 10px;
-    margin-bottom: 14px;
-  }
-  .controls-hint {
-    font-size: 12.5px;
-    color: var(--muted);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
   }
   .color-row {
     display: inline-flex;
@@ -270,26 +268,6 @@
 
   .side.right .dd-menu { left: auto; right: 0; }
 
-  .btn {
-    border: 1px solid var(--border-strong);
-    background: var(--surface);
-    color: var(--text);
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: border-color .15s, background .15s, color .15s;
-  }
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-  .btn.copied { background: var(--ok); border-color: var(--ok); color: #fff; }
-
   .output-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -304,15 +282,49 @@
     gap: 10px;
     margin-bottom: 10px;
   }
-  .output-box {
+  .code-wrap {
+    position: relative;
     background: #1f2329;
-    color: #eef1f5;
     border-radius: 9px;
-    padding: 13px 15px;
+    display: flex;
+    align-items: flex-start;
+  }
+  .output-box {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    color: #eef1f5;
+    padding: 13px 48px 13px 15px;
     font: 13px/1.6 var(--mono);
     white-space: pre-wrap;
     word-break: break-all;
     margin: 0;
+  }
+  .copy-icon-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: #cdd5df;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .copy-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+  .copy-icon-btn.copied {
+    background: rgba(46, 125, 82, 0.28);
+    border-color: rgba(74, 222, 128, 0.55);
+    color: #86efac;
   }
   .output-hint { margin: 9px 0 0; font-size: 12.5px; color: var(--muted); }
   footer {
@@ -368,36 +380,24 @@
   </section>
 
   <section class="controls-card">
-    <div class="controls-top">
-      <span class="controls-hint" data-i18n="stripHint">按底栏实际左右顺序排列：蓝色表示开启，点击切换开关或下拉改样式</span>
-      <div class="color-row">
-        <span data-i18n="textColorLabel">正文颜色：</span>
-        <div class="pill-group" data-select="textColor">
-          <button class="pill-btn" data-val="inherit" data-i18n="tcInherit">跟随正文</button>
-          <button class="pill-btn" data-val="muted" data-i18n="tcMuted">柔灰层次</button>
-          <button class="pill-btn" data-val="plain" data-i18n="tcPlain">纯文本</button>
-        </div>
-      </div>
-    </div>
-
     <div class="strip">
       <!-- Left side in exact statusline order -->
       <div class="side left">
         <div class="cluster">
           <div class="dd" data-select="contextLabel" data-parent="context"></div>
-          <button class="chip" type="button" data-show="context" data-i18n="chipCtx">上下文 %</button>
+          <button class="chip" type="button" data-show="context" data-i18n="chipCtx">占用 %</button>
           <button class="chip" type="button" data-show="capacity" data-parent="context" data-i18n="chipCap">容量</button>
           <div class="dd" data-select="context" data-parent="context"></div>
         </div>
 
         <div class="cluster">
           <div class="dd" data-select="cacheLabel" data-parent="cache"></div>
-          <button class="chip" type="button" data-show="cache" data-i18n="chipCache">缓存 %</button>
+          <button class="chip" type="button" data-show="cache" data-i18n="chipCache">命中 %</button>
           <div class="dd" data-select="cache" data-parent="cache"></div>
         </div>
 
         <div class="cluster">
-          <button class="chip" type="button" data-show="state" data-i18n="chipState">运行状态</button>
+          <button class="chip" type="button" data-show="state" data-i18n="chipState">状态</button>
         </div>
       </div>
 
@@ -422,6 +422,17 @@
         </div>
       </div>
     </div>
+
+    <div class="controls-bottom">
+      <div class="color-row">
+        <span data-i18n="textColorLabel">正文颜色：</span>
+        <div class="pill-group" data-select="textColor">
+          <button class="pill-btn" data-val="inherit" data-i18n="tcInherit" title="跟随终端 / color scheme 正文色">跟随正文</button>
+          <button class="pill-btn" data-val="fixed" data-i18n="tcFixed" title="浅色固定黑、深色固定白，不被彩色主题染色">固定黑白</button>
+          <button class="pill-btn" data-val="muted" data-i18n="tcMuted" title="指标行正文也采用柔和灰，仅黄/红告警突出">柔和灰</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="output-card">
@@ -431,9 +442,13 @@
         <button class="pill-btn" data-tab="cli" data-i18n="tabCli">终端命令 (settings.mjs)</button>
         <button class="pill-btn" data-tab="json">settings.json</button>
       </div>
-      <button class="btn primary" id="copy-btn" data-i18n="copyAgent">一键复制发给 Agent</button>
     </div>
-    <pre class="output-box" id="output-box"></pre>
+    <div class="code-wrap">
+      <pre class="output-box" id="output-box"></pre>
+      <button class="copy-icon-btn" id="copy-btn" type="button" aria-label="Copy" title="复制">
+        <svg id="copy-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
     <p class="output-hint" id="output-hint"></p>
   </section>
 
@@ -479,8 +494,8 @@ const DEFAULTS = {
   show: { ...MODES.standard },
 };
 const PALETTES = {
-  light: { muted: 'rgb(91,107,115)', neutral: 'rgb(138,144,151)', amber: 'rgb(152,97,0)', red: 'rgb(208,42,48)' },
-  dark: { muted: 'rgb(185,195,208)', neutral: 'rgb(185,195,208)', amber: 'rgb(255,209,102)', red: 'rgb(255,133,133)' },
+  light: { body: 'rgb(22,22,22)', muted: 'rgb(91,107,115)', neutral: 'rgb(138,144,151)', amber: 'rgb(152,97,0)', red: 'rgb(208,42,48)' },
+  dark: { body: 'rgb(241,243,245)', muted: 'rgb(185,195,208)', neutral: 'rgb(185,195,208)', amber: 'rgb(255,209,102)', red: 'rgb(255,133,133)' },
 };
 const CONTEXT_LABELS = { en: 'Ctx', zh: '上下文', off: '' };
 const CACHE_LABELS = { en: 'Cache', zh: '缓存', off: '' };
@@ -559,12 +574,11 @@ const I18N = {
     themeBoth: '日 + 夜', themeLight: '浅色', themeDark: '深色',
     scNormal: '正常', scYellow: '黄提醒', scRed: '红告警', scWorking: '运行中',
     widthLabel: '终端宽度',
-    stripHint: '按底栏实际左右顺序排列：蓝色表示开启，点击切换开关或下拉改样式',
-    textColorLabel: '正文颜色：', tcInherit: '跟随正文', tcMuted: '柔灰层次', tcPlain: '纯文本',
+    textColorLabel: '正文颜色：', tcInherit: '跟随正文', tcFixed: '固定黑白', tcMuted: '柔和灰',
     chipCtx: '占用 %', chipCap: '容量', chipCache: '命中 %', chipState: '状态',
     chipQuota: '额度', chipGroup: '组名', chipQ5h: '5h', chipR5h: '倒计时', chipQw: '周', chipRw: '倒计时',
     tabAgent: '发给 Agent (/capsule-guide)', tabCli: '终端命令 (settings.mjs)',
-    copyAgent: '一键复制发给 Agent', copyCli: '复制终端命令', copyJson: '复制 settings.json', copied: '已复制 ✓',
+    copyTip: '复制', copiedTip: '已复制',
     hintAgent: '直接粘贴到 Antigravity 对话中发送，已安装 /capsule-guide skill 的 Agent 会自动调用本地 helper 生效。',
     hintCli: '在 PowerShell / bash / zsh 中运行即可，无需消耗模型调用；下一次底栏刷新生效。',
     hintJson: '保存到 ~/.gemini/config/agy-capsule/cli/settings.json；下一次底栏刷新生效。',
@@ -616,12 +630,11 @@ const I18N = {
     themeBoth: 'Day + Night', themeLight: 'Light', themeDark: 'Dark',
     scNormal: 'Normal', scYellow: 'Yellow', scRed: 'Red', scWorking: 'Working',
     widthLabel: 'Width',
-    stripHint: 'Ordered left-to-right just like the statusline: blue = active, click to toggle or open ▾ menu',
-    textColorLabel: 'Text:', tcInherit: 'Follow Body', tcMuted: 'Muted Gray', tcPlain: 'Plain',
+    textColorLabel: 'Body color:', tcInherit: 'Follow Body', tcFixed: 'Fixed B/W', tcMuted: 'Muted Gray',
     chipCtx: 'Used %', chipCap: 'Cap', chipCache: 'Hit %', chipState: 'State',
     chipQuota: 'Quota', chipGroup: 'Group', chipQ5h: '5h', chipR5h: 'Reset', chipQw: 'Week', chipRw: 'Reset',
     tabAgent: 'Send to Agent (/capsule-guide)', tabCli: 'Terminal CLI (settings.mjs)',
-    copyAgent: 'Copy for Agent', copyCli: 'Copy CLI Command', copyJson: 'Copy settings.json', copied: 'Copied ✓',
+    copyTip: 'Copy', copiedTip: 'Copied',
     hintAgent: 'Paste directly into Antigravity chat. With /capsule-guide installed, your agent applies it via the local helper.',
     hintCli: 'Run directly in PowerShell, bash, or zsh with zero model calls. Applies on the next statusline refresh.',
     hintJson: 'Save to ~/.gemini/config/agy-capsule/cli/settings.json. Applies on the next statusline refresh.',
@@ -735,7 +748,7 @@ function renderModelLineHtml(payload, theme) {
   let left = ['working', 'tool_use'].includes(payload.agent_state) ? 'esc to cancel' : '? for shortcuts';
   if (left.length + 2 + right.length > width) left = '';
   const line = left + ' '.repeat(width - left.length - right.length) + right;
-  return state.textColor === 'muted' ? span(line, 'muted', theme) : esc(line);
+  return span(line, 'muted', theme);
 }
 function renderStatusHtml(payload, ageSec, theme) {
   const { show } = state;
@@ -811,11 +824,9 @@ function renderStatusHtml(payload, ageSec, theme) {
   if (!left && !right) return `<span class="empty-hint">${esc(I18N[lang].emptyLine)}</span>`;
 
   const padding = right ? ' '.repeat(Math.max(0, width - displayWidth(left) - displayWidth(right))) : '';
-  const useColor = state.textColor !== 'plain';
-  const dotHtml = tone => useColor && (tone !== 'neutral' || state.textColor === 'muted') ? span('●', tone, theme) : '●';
   const cacheTone = ageSec >= 240 ? 'red' : ageSec >= 180 ? 'amber' : 'neutral';
   let leftHtml = esc(left);
-  if (useColor && left && !leftClipped) {
+  if (left && !leftClipped) {
     const parts = [];
     if (leftOpts.withContext && show.context) {
       const coreText = leftOpts.shortContext ? (state.contextLabel === 'en' ? `C ${pct}` : pct) : contextBase;
@@ -827,7 +838,7 @@ function renderStatusHtml(payload, ageSec, theme) {
     }
     if (leftOpts.withCache && cacheBlock) {
       let cHtml = esc(cacheBlock);
-      if (state.cache === 'dot') cHtml = cHtml.replace('●', dotHtml(cacheTone));
+      if (state.cache === 'dot') cHtml = cHtml.replace('●', span('●', cacheTone, theme));
       else if (state.cache === 'text' && cacheTone !== 'neutral') cHtml = span(cacheBlock, cacheTone, theme);
       parts.push(cHtml);
     }
@@ -835,13 +846,15 @@ function renderStatusHtml(payload, ageSec, theme) {
     if (leftOpts.withState && stateLabel) leftHtml = leftHtml ? `${leftHtml} | ${esc(stateLabel)}` : esc(stateLabel);
   }
   let rightHtml = esc(right);
-  if (useColor && right) {
-    if (state.quota === 'dot') rightHtml = rightHtml.replace('●', dotHtml(quotaTone(payload, show)));
+  if (right) {
+    if (state.quota === 'dot') rightHtml = rightHtml.replace('●', span('●', quotaTone(payload, show), theme));
     else if (state.quota === 'text') {
       rightHtml = rightHtml.replace(/\b(\d+)%/g, (m, p) => Number(p) <= 25 ? span(m, Number(p) <= 10 ? 'red' : 'amber', theme) : m);
     }
   }
-  return leftHtml + padding + rightHtml;
+  const baseColor = state.textColor === 'fixed' ? PALETTES[theme].body : state.textColor === 'muted' ? PALETTES[theme].muted : null;
+  const rowHtml = leftHtml + padding + rightHtml;
+  return baseColor ? `<span style="color:${baseColor}">${rowHtml}</span>` : rowHtml;
 }
 
 function diffCount(modeName) {
@@ -970,16 +983,16 @@ function applyI18n() {
   updateCopyButtonLabel(false);
 }
 
+const COPY_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
 function updateCopyButtonLabel(copied) {
   const t = I18N[lang];
   const btn = document.getElementById('copy-btn');
-  if (copied) {
-    btn.textContent = t.copied;
-    btn.classList.add('copied');
-  } else {
-    btn.classList.remove('copied');
-    btn.textContent = outputTab === 'agent' ? t.copyAgent : outputTab === 'cli' ? t.copyCli : t.copyJson;
-  }
+  btn.classList.toggle('copied', copied);
+  btn.innerHTML = copied ? CHECK_SVG : COPY_SVG;
+  btn.title = copied ? t.copiedTip : t.copyTip;
+  btn.setAttribute('aria-label', btn.title);
 }
 
 function syncUI() {

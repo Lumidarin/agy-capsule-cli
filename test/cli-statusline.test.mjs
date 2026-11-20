@@ -17,10 +17,10 @@ const plain = p => renderStatusline(p, { now });
 test('compact mode (and legacy compact: true) hides labels, cache and extra state without moving or recoloring quota', () => {
   const p = { ...samples.cachedResponse, agent_state: 'working', terminal_width: 120 };
   for (const theme of ['light', 'dark']) {
-    const opts = { now, theme, color: true, settings: { textColor: 'muted' } };
+    const opts = { now, theme, color: true };
     const full = renderStatusline(p, opts);
-    const compact = renderStatusline(p, { ...opts, settings: { mode: 'compact', textColor: 'muted' } });
-    const legacyCompact = renderStatusline(p, { ...opts, settings: { compact: true, textColor: 'muted' } });
+    const compact = renderStatusline(p, { ...opts, settings: { mode: 'compact' } });
+    const legacyCompact = renderStatusline(p, { ...opts, settings: { compact: true } });
     assert.equal(compact, legacyCompact);
     const right = full.slice(full.lastIndexOf('\x1b[38;2;', full.indexOf('Gemini')));
     assert.match(compact, /^1\.5% \(1\.0M\) +\x1b/);
@@ -140,28 +140,34 @@ test('all 12 per-item visibility switches and quota label modes work independent
   assert.equal(allHidden, '');
 });
 
-test('textColor supports inherit (follows terminal foreground), muted (gray hierarchy) and plain (no ANSI)', () => {
+test('textColor controls row-2 body color (inherit, fixed, muted, plain) while keeping row-1 muted', () => {
   const p = structuredClone(samples.cachedResponse);
   p.context_window.used_percentage = 92;
-  // inherit (default): model line has no ANSI, neutral dots have no ANSI, alerts still colorize
-  assert.equal(renderModelLine(p, true, 'light', 'inherit'), renderModelLine(p));
-  assert.equal(renderModelLine(p, true, 'dark', 'inherit'), renderModelLine(p));
-  const inheritOut = renderStatusline(p, { now, color: true, settings: { textColor: 'inherit' } });
-  assert.match(inheritOut, /\x1b\[38;2;208;42;48m92\.0%/);
-  assert.match(inheritOut, /Cache 79\.6% ●/); // neutral dot uncolored
-  assert.match(inheritOut, /● Gemini/); // neutral dot uncolored
+  // Row 1 stays muted in inherit/fixed/muted and only drops ANSI in plain
+  assert.notEqual(renderModelLine(p, true, 'dark', 'inherit'), renderModelLine(p, true, 'light', 'inherit'));
+  assert.equal(renderModelLine(p, true, 'light', 'inherit'), renderModelLine(p, true, 'light', 'fixed'));
+  assert.equal(renderModelLine(p, true, 'light', 'inherit'), renderModelLine(p, true, 'light', 'muted'));
+  assert.equal(renderModelLine(p, true, 'dark', 'plain'), renderModelLine(p));
 
-  // muted: model line & neutral dots get day/night gray RGB
-  assert.notEqual(renderModelLine(p, true, 'dark', 'muted'), renderModelLine(p, true, 'light', 'muted'));
-  assert.equal(renderModelLine(p, true, 'dark', 'muted').replace(/\x1b\[[\d;]+m/g, ''), renderModelLine(p));
-  const mutedOut = renderStatusline(p, { now, color: true, settings: { textColor: 'muted' } });
-  assert.match(mutedOut, /Cache 79\.6% \x1b\[38;2;138;144;151m●\x1b\[0m/);
-  assert.match(mutedOut, /\x1b\[38;2;138;144;151m●\x1b\[0m Gemini/);
+  // inherit (default): row 2 body has no base RGB, alerts & neutral dots tint normally
+  const inheritOut = renderStatusline(p, { now, color: true, settings: { textColor: 'inherit' } });
+  assert.match(inheritOut, /^Ctx \x1b\[38;2;208;42;48m92\.0%\x1b\[0m \(1\.0M\)/);
+
+  // fixed: row 2 body painted in fixed black (light) / white (dark), alerts preserved
+  const fixedLight = renderStatusline(p, { now, color: true, theme: 'light', settings: { textColor: 'fixed' } });
+  const fixedDark = renderStatusline(p, { now, color: true, theme: 'dark', settings: { textColor: 'fixed' } });
+  assert.match(fixedLight, /^\x1b\[38;2;22;22;22mCtx \x1b\[38;2;208;42;48m92\.0%\x1b\[38;2;22;22;22m \(1\.0M\)/);
+  assert.match(fixedDark, /^\x1b\[38;2;241;243;245mCtx /);
+  assert.equal(fixedLight.replace(/\x1b\[[\d;]+m/g, ''), plain(p));
+
+  // muted: row 2 body painted in muted gray, alerts preserved
+  const mutedLight = renderStatusline(p, { now, color: true, theme: 'light', settings: { textColor: 'muted' } });
+  assert.match(mutedLight, /^\x1b\[38;2;91;107;115mCtx \x1b\[38;2;208;42;48m92\.0%\x1b\[38;2;91;107;115m \(1\.0M\)/);
+  assert.equal(mutedLight.replace(/\x1b\[[\d;]+m/g, ''), plain(p));
 
   // plain: zero ANSI codes even with red alerts
   const plainOut = renderStatusline(p, { now, color: true, lastResponseAtMs: now - 240000, settings: { textColor: 'plain' } });
   assert.doesNotMatch(plainOut, /\x1b/);
-  assert.equal(renderModelLine(p, true, 'dark', 'plain'), renderModelLine(p));
 });
 
 test('real 1.5.10 cached response: context, cache hit and only the current Gemini pool', () => {
@@ -242,12 +248,11 @@ test('color is optional and only adds controls owned by the renderer', () => {
 
 test('cache warning turns yellow at 3m, red at 4m, and unknown times remain neutral', () => {
   const p = samples.cachedResponse;
-  const renderAge = (age, textColor = 'muted') => renderStatusline(p, {
-    color: true, now, lastResponseAtMs: age === null ? null : now - age, settings: { textColor },
+  const renderAge = age => renderStatusline(p, {
+    color: true, now, lastResponseAtMs: age === null ? null : now - age,
   });
   for (const age of [null, 179999, -1]) {
-    assert.match(renderAge(age, 'muted'), /Cache 79\.6% \x1b\[38;2;138;144;151m●/);
-    assert.match(renderAge(age, 'inherit'), /Cache 79\.6% ●/);
+    assert.match(renderAge(age), /Cache 79\.6% \x1b\[38;2;138;144;151m●/);
   }
   assert.match(renderAge(180000), /Cache 79\.6% \x1b\[38;2;152;97;0m●\x1b\[0m/);
   assert.match(renderAge(239999), /Cache 79\.6% \x1b\[38;2;152;97;0m●/);
@@ -260,7 +265,7 @@ test('one quota dot: weekly red overrides, otherwise follows 5h; numbers stay ne
     const p = structuredClone(samples.cachedResponse);
     p.quota['gemini-5h'].remaining_fraction = five;
     p.quota['gemini-weekly'].remaining_fraction = weekly;
-    const text = renderStatusline(p, { now, color: true, settings: { textColor: 'muted' } });
+    const text = renderStatusline(p, { now, color: true });
     assert.ok(text.includes(`\x1b[38;2;${rgb}m●\x1b[0m Gemini`));
     assert.doesNotMatch(text, /\x1b\[[\d;]+m\d+%/);
     assert.equal((text.match(/●/g) || []).length, 2);
@@ -268,7 +273,7 @@ test('one quota dot: weekly red overrides, otherwise follows 5h; numbers stay ne
   const p = structuredClone(samples.cachedResponse);
   p.model = { id: 'gemini-argon' };
   p.quota['gemini-argon-wtu-weekly'].remaining_fraction = .19;
-  assert.match(renderStatusline(p, { now, color: true, settings: { textColor: 'muted' } }), /\x1b\[38;2;138;144;151m●\x1b\[0m Argon/);
+  assert.match(renderStatusline(p, { now, color: true }), /\x1b\[38;2;138;144;151m●\x1b\[0m Argon/);
   p.quota['gemini-argon-wtu-weekly'].remaining_fraction = .08;
   assert.match(renderStatusline(p, { now, color: true }), /\x1b\[38;2;208;42;48m●\x1b\[0m Argon/);
 });
