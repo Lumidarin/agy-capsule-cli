@@ -6,7 +6,7 @@ A statusline for Antigravity CLI (`agy`) that is **fully customizable**: choose 
 
 ![Light and dark preview](docs/preview.png)
 
-## 👉 [Open the Web Configurator](https://lumidarin.github.io/agy-capsule-cli/), tweak it, and send the result to your agent
+## 👉 [Open the Web Configurator, tweak it, and send the result to your agent](https://lumidarin.github.io/agy-capsule-cli/)
 
 ## Install
 

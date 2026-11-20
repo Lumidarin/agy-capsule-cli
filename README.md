@@ -6,7 +6,7 @@
 
 ![浅色与深色预览](docs/preview.png)
 
-## 👉 [打开在线配置器，调](https://lumidarin.github.io/agy-capsule-cli/)好发给 Agent 即可生效
+## 👉 [打开在线配置器，调好发给 Agent 即可生效](https://lumidarin.github.io/agy-capsule-cli/)
 
 ## 安装
 
