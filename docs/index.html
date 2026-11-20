@@ -139,7 +139,7 @@
   .terminal-tag { text-transform: uppercase; }
   .terminal pre {
     margin: 0;
-    font: 15px/1.75 var(--mono);
+    font: 14.5px/1.75 var(--mono);
     white-space: pre;
   }
   .terminal pre .empty-hint { opacity: 0.5; font-style: italic; }
@@ -270,20 +270,20 @@
       </div>
       <div class="preview-bar-right">
         <div class="pill-group" role="group" aria-label="Theme">
-          <button class="pill-btn icon-only" data-theme="light" data-title-i18n="themeLight" title="浅色" aria-label="Light">
+          <button class="pill-btn icon-only active" data-theme="light" data-title-i18n="themeLight" title="浅色" aria-label="Light">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
           </button>
           <button class="pill-btn icon-only" data-theme="both" data-title-i18n="themeBoth" title="日 + 夜" aria-label="Day and Night">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
           </button>
-          <button class="pill-btn icon-only active" data-theme="dark" data-title-i18n="themeDark" title="深色" aria-label="Dark">
+          <button class="pill-btn icon-only" data-theme="dark" data-title-i18n="themeDark" title="深色" aria-label="Dark">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
         </div>
         <label class="width-control">
           <span data-i18n="widthLabel">终端宽度</span>
-          <input id="width-slider" type="range" min="48" max="120" value="104">
-          <span class="width-val" id="width-val">104</span>
+          <input id="width-slider" type="range" min="48" max="120" value="120">
+          <span class="width-val" id="width-val">120</span>
         </label>
         <div class="pill-group" role="group" aria-label="View mode">
           <button class="pill-btn active" data-view="edit" data-i18n="viewEdit">编辑</button>
@@ -456,11 +456,11 @@ const I18N = {
 };
 
 let lang = 'zh';
-let viewTheme = 'dark';
+let viewTheme = 'light';
 let viewMode = 'edit';
 let scenarioKey = 'normal';
 let outputTab = 'agent';
-let termWidth = 104;
+let termWidth = 120;
 const state = structuredClone(DEFAULTS);
 
 const esc = s => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
