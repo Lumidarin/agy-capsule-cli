@@ -1,0 +1,9 @@
+node_modules/
+tmp/
+dist/
+coverage/
+cli/settings.json
+*.db
+*.db-*
+*.jsonl
+.DS_Store

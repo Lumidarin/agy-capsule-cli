@@ -1,0 +1,121 @@
+{
+  "initial": {
+    "version": "1.5.10",
+    "model": {
+      "id": "Gemini 4 Hydrogen (Medium)",
+      "display_name": "Gemini 4 Hydrogen (Medium)"
+    },
+    "context_window": {
+      "total_input_tokens": 0,
+      "total_output_tokens": 0,
+      "context_window_size": 0,
+      "used_percentage": 0,
+      "remaining_percentage": 0,
+      "current_usage": null
+    },
+    "agent_state": "authenticating",
+    "terminal_width": 80
+  },
+  "firstResponse": {
+    "version": "1.5.10",
+    "model": {
+      "id": "Gemini 4 Hydrogen (Medium)",
+      "display_name": "Gemini 4 Hydrogen (Medium)",
+      "effort": "medium"
+    },
+    "context_window": {
+      "total_input_tokens": 15101,
+      "total_output_tokens": 33,
+      "context_window_size": 1048576,
+      "used_percentage": 1.4401435852050781,
+      "remaining_percentage": 98.55985641479492,
+      "current_usage": {
+        "input_tokens": 10510,
+        "output_tokens": 33,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      }
+    },
+    "quota": {
+      "3p-5h": {
+        "remaining_fraction": 1,
+        "reset_time": "2026-11-17T16:50:06Z",
+        "reset_in_seconds": 15598,
+        "disabled": true
+      },
+      "3p-weekly": {
+        "remaining_fraction": 0,
+        "reset_time": "2026-11-22T22:08:46Z",
+        "reset_in_seconds": 466718
+      },
+      "gemini-5h": {
+        "remaining_fraction": 0.9651848,
+        "reset_time": "2026-11-17T15:29:54Z",
+        "reset_in_seconds": 10786
+      },
+      "gemini-argon-wtu-weekly": {
+        "remaining_fraction": 0.15547986,
+        "reset_time": "2026-11-21T12:38:50Z",
+        "reset_in_seconds": 346122
+      },
+      "gemini-weekly": {
+        "remaining_fraction": 0.18770766,
+        "reset_time": "2026-11-21T12:31:32Z",
+        "reset_in_seconds": 345684
+      }
+    },
+    "agent_state": "idle",
+    "terminal_width": 80
+  },
+  "cachedResponse": {
+    "version": "1.5.10",
+    "model": {
+      "id": "Gemini 4 Hydrogen (Medium)",
+      "display_name": "Gemini 4 Hydrogen (Medium)",
+      "effort": "medium"
+    },
+    "context_window": {
+      "total_input_tokens": 15205,
+      "total_output_tokens": 67,
+      "context_window_size": 1048576,
+      "used_percentage": 1.4500617980957031,
+      "remaining_percentage": 98.5499382019043,
+      "current_usage": {
+        "input_tokens": 2171,
+        "output_tokens": 34,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 8456
+      }
+    },
+    "quota": {
+      "3p-5h": {
+        "remaining_fraction": 1,
+        "reset_time": "2026-11-17T16:50:06Z",
+        "reset_in_seconds": 15565,
+        "disabled": true
+      },
+      "3p-weekly": {
+        "remaining_fraction": 0,
+        "reset_time": "2026-11-22T22:08:46Z",
+        "reset_in_seconds": 466685
+      },
+      "gemini-5h": {
+        "remaining_fraction": 0.9651848,
+        "reset_time": "2026-11-17T15:29:54Z",
+        "reset_in_seconds": 10753
+      },
+      "gemini-argon-wtu-weekly": {
+        "remaining_fraction": 0.15547986,
+        "reset_time": "2026-11-21T12:38:50Z",
+        "reset_in_seconds": 346089
+      },
+      "gemini-weekly": {
+        "remaining_fraction": 0.18770766,
+        "reset_time": "2026-11-21T12:31:32Z",
+        "reset_in_seconds": 345651
+      }
+    },
+    "agent_state": "idle",
+    "terminal_width": 80
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "agy-capsule-cli",
+  "version": "0.1.0-experimental.1",
+  "private": true,
+  "description": "Compact context, cache and current-model quota statusline for Antigravity CLI",
+  "homepage": "https://lumidarin.github.io/agy-capsule-cli/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lumidarin/agy-capsule-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lumidarin/agy-capsule-cli/issues"
+  },
+  "keywords": [
+    "antigravity",
+    "agy",
+    "cli",
+    "statusline",
+    "quota",
+    "context"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "setup": "node cli/install.mjs",
+    "setup:no-skill": "node cli/install.mjs install --no-skill",
+    "remove": "node cli/install.mjs uninstall",
+    "preview": "node scripts/preview.mjs",
+    "release": "node scripts/release.mjs"
+  }
+}
