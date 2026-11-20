@@ -4,9 +4,9 @@
 
 **Experimental · 0.1.0-experimental.1**
 
-A compact, zero-dependency statusline for Antigravity CLI (`agy`): Context and Cache hit on the left, current-model quota on the right — with **`standard` / `compact` presets**, **10 visibility toggles + 4 customizable prefix labels** (`Ctx`/`上下文`/off, `Cache`/`缓存`/off, `🕔`/`5h`/`5小时`/off, `📅`/`w`/`周`/off), and **independent alert styles**. Standalone from the desktop [agy-capsule](https://github.com/Lumidarin/agy-capsule) app.
+A compact, zero-dependency statusline for Antigravity CLI (`agy`): Context and Cache hit on the left, current-model quota on the right — with **`standard` / `compact` presets**, **12 flat independent visibility toggles**, **body text color modes**, and **independent alert styles**. Standalone from the desktop [agy-capsule](https://github.com/Lumidarin/agy-capsule) app.
 
-> **Interactive Configurator (GitHub Pages)**: Open the [Web Configurator](https://lumidarin.github.io/agy-capsule-cli/) (or open [docs/index.html](docs/index.html) locally), toggle what you want with live day/night previews, and **one-click copy a `/capsule-guide ...` command for your Agent to apply**.
+> **Interactive Configurator (GitHub Pages)**: Open the [Web Configurator](https://lumidarin.github.io/agy-capsule-cli/) (or open [docs/index.html](docs/index.html) locally), **click any item directly in the terminal preview to toggle it**, switch to Preview to inspect the exact output, and copy the `/capsule-guide ...` command for your Agent.
 
 ![Day/night × Standard/Compact preview](docs/preview.png)
 
@@ -64,7 +64,7 @@ Ctx 14.2% (1.0M)  Cache 98.4% ●       ● Gemini 🕔 96% (2h 26m) 📅 19% (3
 - Sets `stack_with_default: false` and renders the model line itself (so native AI Credits are not shown).
 - `Ctx` shows host-reported context usage percentage and window capacity (decimal K/M).
 - `Cache` shows the latest turn's `cache_read_input_tokens / (input_tokens + cache_read_input_tokens)`. When `show.cache` is off (including default `compact` mode), local SQLite is not queried.
-- Quota shows only the active model's pool: Gemini, Claude, or Argon's dedicated weekly pool. 5h and weekly windows, their prefix styles (`🕔`/`5h`/`5小时`/off and `📅`/`w`/`周`/off), and their reset countdowns can each be configured independently. Third-party pools are labeled `Claude` for Claude models; GPT models are not currently mapped.
+- Quota shows only the active model's pool: Gemini, Claude, or Argon's dedicated weekly pool. Group name, 5h/weekly icons (`🕔`/`📅`), percentages, and reset countdowns are all independently toggleable. Third-party pools are labeled `Claude` for Claude models; GPT models are not currently mapped.
 - On narrow terminals, optional details degrade progressively to stay on one row.
 - Missing values display `--`; disabled buckets are hidden while genuine `0%` is preserved. Past reset times show `(due)`.
 
@@ -72,35 +72,28 @@ Ctx 14.2% (1.0M)  Cache 98.4% ●       ● Gemini 🕔 96% (2h 26m) 📅 19% (3
 
 Preferences live in `~/.gemini/config/agy-capsule/cli/settings.json` and take effect on the next host statusline refresh.
 
-### 1. Presets (`mode`) & Visibility Toggles (`show.*`)
+### 1. Presets (`mode`) & 12 Flat Visibility Toggles (`show.*`)
 
-| Side | Item | Key (`show.*`) | `standard` | `compact` | Notes |
-| --- | --- | --- | --- | --- | --- |
-| Left | Context block | `context` | `true` | `true` | Hides prefix & capacity when off |
-| Left | Window capacity | `capacity` | `true` | `true` | `(1.0M)` |
-| Left | Cache hit block | `cache` | `true` | `false` | Skips SQLite lookup when off |
-| Left | Agent state | `state` | `true` | `false` | `\| working`, `\| tool_use` |
-| Right | Quota block | `quota` | `true` | `true` | Entire right-side quota section |
-| Right | Quota group name | `quotaGroup` | `true` | `false` | `Gemini` / `Claude` / `Argon` |
-| Right | 5-hour quota | `quota5h` | `true` | `true` | Toggle 5h window independently |
-| Right | Weekly quota | `quotaWeekly` | `true` | `true` | Toggle weekly window independently |
-| Right | 5h reset countdown | `reset5h` | `true` | `true` | Toggle 5h `(2h 26m)` |
-| Right | Weekly reset countdown | `resetWeekly` | `true` | `true` | Toggle weekly `(3d 23h)` |
+All 12 items are completely flat and independent (no parent-gate coupling):
 
-> Shorthand & compatibility: `reset` toggles both `reset5h` and `resetWeekly`. Legacy `"compact": true` and `"show": { "reset": false }` remain supported.
+| Side | Item | Key (`show.*`) | `standard` | `compact` |
+| --- | --- | --- | --- | --- |
+| Left | `Ctx` label | `contextLabel` | `true` | `false` |
+| Left | Context usage (`14.2%`) | `context` | `true` | `true` |
+| Left | Window capacity (`(1.0M)`) | `capacity` | `true` | `true` |
+| Left | `Cache` label | `cacheLabel` | `true` | `false` |
+| Left | Cache hit (`98.4%`) | `cache` | `true` | `false` |
+| Right | Quota group (`Gemini`/`Claude`/`Argon`) | `quotaGroup` | `true` | `false` |
+| Right | 5h icon (`🕔`) | `quota5hIcon` | `true` | `true` |
+| Right | 5h quota (`96%`) | `quota5h` | `true` | `true` |
+| Right | 5h reset countdown (`(2h 26m)`) | `reset5h` | `true` | `true` |
+| Right | Weekly icon (`📅`) | `quotaWeeklyIcon` | `true` | `true` |
+| Right | Weekly quota (`19%`) | `quotaWeekly` | `true` | `true` |
+| Right | Weekly reset countdown (`(3d 23h)`) | `resetWeekly` | `true` | `true` |
 
-### 2. Prefix Label Styles
+> Shorthand & compatibility: `reset` toggles both `reset5h` and `resetWeekly`; `quota` toggles all 7 right-side items. Legacy `"compact": true` remains supported.
 
-| JSON key | Modes | Default (`standard` / `compact`) |
-| --- | --- | --- |
-| `contextLabel` | `en` (`Ctx`) · `zh` (`上下文`) · `off` | `en` / `off` |
-| `cacheLabel` | `en` (`Cache`) · `zh` (`缓存`) · `off` | `en` / `off` |
-| `quota5hLabel` | `icon` (`🕔`) · `short` (`5h`) · `zh` (`5小时`) · `off` | `icon` |
-| `quotaWeeklyLabel` | `icon` (`📅`) · `short` (`w`) · `zh` (`周`) · `off` | `icon` |
-
-Use `quotaLabel` in CLI commands to set both 5h and weekly prefixes at once.
-
-### 3. Text Color (`textColor`) & Alert Modes
+### 2. Body Text Color (`textColor`) & Alert Modes
 
 | Setting | JSON key | Values | Default |
 | --- | --- | --- | --- |
@@ -111,17 +104,17 @@ Use `quotaLabel` in CLI commands to set both 5h and weekly prefixes at once.
 
 `off` disables color alerts only — use `disable` or `show.<item> off` to hide an item.
 
-### 4. Three Ways to Configure
+### 3. Three Ways to Configure
 
 **Option A: Interactive Configurator + `/capsule-guide`**
 
-Open the [Web Configurator](https://lumidarin.github.io/agy-capsule-cli/), toggle what you want, click **Copy for Agent**, and paste into Antigravity. Or type naturally in AGY:
+Open the [Web Configurator](https://lumidarin.github.io/agy-capsule-cli/), click items directly in Edit mode to toggle them, copy the generated command via the copy icon, and paste into Antigravity. Or type naturally in AGY:
 
 ```text
 /capsule-guide
 /capsule-guide compact mode
-/capsule-guide use 5h and w labels and hide weekly reset
-/capsule-guide compact mode with cache enabled and no Cache label
+/capsule-guide hide quota icons and weekly reset
+/capsule-guide compact mode with cache enabled
 /capsule-guide reset
 ```
 
@@ -131,20 +124,16 @@ Open the [Web Configurator](https://lumidarin.github.io/agy-capsule-cli/), toggl
 # View effective settings (read-only)
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" show
 
-# Switch preset (resets show.* overrides, keeps alert and label styles)
+# Switch preset (resets show.* overrides, keeps textColor and alert styles)
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" mode compact
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" mode standard
 
 # Toggle individual items
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" enable cache
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" disable cacheLabel resetWeekly quotaGroup
-
-# Change quota window prefix styles (icon | short | zh | off)
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set quota5hLabel short quotaWeeklyLabel short
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set quotaLabel zh
+node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" disable quota5hIcon quotaWeeklyIcon resetWeekly
 
 # Combine in one command
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set mode compact show.cache on show.cacheLabel off show.resetWeekly off quotaLabel short
+node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set mode compact textColor fixed show.cache on show.resetWeekly off
 
 # Restore defaults
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" reset
@@ -157,11 +146,10 @@ Edit `~/.gemini/config/agy-capsule/cli/settings.json` (only list `show` override
 ```json
 {
   "mode": "compact",
+  "textColor": "fixed",
   "context": "text",
   "cache": "dot",
   "quota": "dot",
-  "quota5hLabel": "short",
-  "quotaWeeklyLabel": "short",
   "show": {
     "cache": true,
     "resetWeekly": false

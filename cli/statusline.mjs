@@ -6,39 +6,36 @@ import { execFileSync } from 'node:child_process';
 
 export const MODES = Object.freeze({
   standard: Object.freeze({
+    contextLabel: true,
     context: true,
     capacity: true,
+    cacheLabel: true,
     cache: true,
-    state: true,
-    quota: true,
     quotaGroup: true,
+    quota5hIcon: true,
     quota5h: true,
-    quotaWeekly: true,
     reset5h: true,
+    quotaWeeklyIcon: true,
+    quotaWeekly: true,
     resetWeekly: true,
   }),
   compact: Object.freeze({
+    contextLabel: false,
     context: true,
     capacity: true,
+    cacheLabel: false,
     cache: false,
-    state: false,
-    quota: true,
     quotaGroup: false,
+    quota5hIcon: true,
     quota5h: true,
-    quotaWeekly: true,
     reset5h: true,
+    quotaWeeklyIcon: true,
+    quotaWeekly: true,
     resetWeekly: true,
   }),
 });
 
-export const MODE_LABELS = Object.freeze({
-  standard: Object.freeze({ contextLabel: 'en', cacheLabel: 'en' }),
-  compact: Object.freeze({ contextLabel: 'off', cacheLabel: 'off' }),
-});
-
 export const SHOW_KEYS = Object.freeze(Object.keys(MODES.standard));
-export const TEXT_LABEL_MODES = Object.freeze(['en', 'zh', 'off']);
-export const QUOTA_LABEL_MODES = Object.freeze(['icon', 'short', 'zh', 'off']);
 export const TEXT_COLOR_MODES = Object.freeze(['inherit', 'fixed', 'muted', 'plain']);
 
 export const DEFAULT_SETTINGS = Object.freeze({
@@ -47,10 +44,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   context: 'text',
   cache: 'dot',
   quota: 'dot',
-  contextLabel: 'en',
-  cacheLabel: 'en',
-  quota5hLabel: 'icon',
-  quotaWeeklyLabel: 'icon',
   show: MODES.standard,
 });
 
@@ -88,41 +81,36 @@ export function normalizeSettings(value) {
     ? value.mode
     : value?.compact === true ? 'compact' : DEFAULT_SETTINGS.mode;
   const show = { ...MODES[mode] };
-  let contextLabel = MODE_LABELS[mode].contextLabel;
-  let cacheLabel = MODE_LABELS[mode].cacheLabel;
+  // Backwards compatibility for legacy label/group keys.
+  if (value?.contextLabel === 'off') show.contextLabel = false;
+  if (value?.cacheLabel === 'off') show.cacheLabel = false;
+  if (value?.quota5hLabel === 'off') show.quota5hIcon = false;
+  if (value?.quotaWeeklyLabel === 'off') show.quotaWeeklyIcon = false;
   if (value?.show && typeof value.show === 'object' && !Array.isArray(value.show)) {
-    // Legacy show.reset acts as a default for both reset5h and resetWeekly.
+    if (typeof value.show.quota === 'boolean') {
+      for (const k of ['quotaGroup', 'quota5hIcon', 'quota5h', 'reset5h', 'quotaWeeklyIcon', 'quotaWeekly', 'resetWeekly']) {
+        show[k] = value.show.quota;
+      }
+    }
     if (typeof value.show.reset === 'boolean') {
       show.reset5h = value.show.reset;
       show.resetWeekly = value.show.reset;
     }
-    // Legacy boolean show.contextLabel / show.cacheLabel map to en/off.
-    if (typeof value.show.contextLabel === 'boolean') contextLabel = value.show.contextLabel ? 'en' : 'off';
-    if (typeof value.show.cacheLabel === 'boolean') cacheLabel = value.show.cacheLabel ? 'en' : 'off';
     for (const key of SHOW_KEYS) {
       if (typeof value.show[key] === 'boolean') show[key] = value.show[key];
     }
   }
-  if (TEXT_LABEL_MODES.includes(value?.contextLabel)) contextLabel = value.contextLabel;
-  if (TEXT_LABEL_MODES.includes(value?.cacheLabel)) cacheLabel = value.cacheLabel;
   const result = {
     mode,
     textColor: TEXT_COLOR_MODES.includes(value?.textColor) ? value.textColor : DEFAULT_SETTINGS.textColor,
     context: DEFAULT_SETTINGS.context,
     cache: DEFAULT_SETTINGS.cache,
     quota: DEFAULT_SETTINGS.quota,
-    contextLabel,
-    cacheLabel,
-    quota5hLabel: DEFAULT_SETTINGS.quota5hLabel,
-    quotaWeeklyLabel: DEFAULT_SETTINGS.quotaWeeklyLabel,
     show,
   };
   for (const key of ['context', 'cache', 'quota']) {
     const allowed = key === 'context' ? ['text', 'off'] : ['text', 'dot', 'off'];
     if (allowed.includes(value?.[key])) result[key] = value[key];
-  }
-  for (const key of ['quota5hLabel', 'quotaWeeklyLabel']) {
-    if (QUOTA_LABEL_MODES.includes(value?.[key])) result[key] = value[key];
   }
   return result;
 }
@@ -142,13 +130,6 @@ const knownBuckets = {
   '3p-5h': ['Claude', '5h'],
   '3p-weekly': ['Claude', 'weekly'],
 };
-
-const CONTEXT_LABELS = Object.freeze({ en: 'Ctx', zh: '上下文', off: '' });
-const CACHE_LABELS = Object.freeze({ en: 'Cache', zh: '缓存', off: '' });
-const WINDOW_LABELS = Object.freeze({
-  '5h': Object.freeze({ icon: '🕔', short: '5h', zh: '5小时', off: '' }),
-  weekly: Object.freeze({ icon: '📅', short: 'w', zh: '周', off: '' }),
-});
 
 function charWidth(ch) {
   const cp = ch.codePointAt(0);
@@ -261,8 +242,8 @@ function quotaTone(payload, show = MODES.standard) {
   for (const [id, bucket] of Object.entries(payload.quota || {})) {
     if (!bucket || bucket.disabled === true || knownBuckets[id]?.[0] !== selected) continue;
     const kind = knownBuckets[id]?.[1];
-    if (kind === '5h' && !show.quota5h) continue;
-    if (kind === 'weekly' && !show.quotaWeekly) continue;
+    if (kind === '5h' && !show.quota5h && !show.quota5hIcon && !show.reset5h) continue;
+    if (kind === 'weekly' && !show.quotaWeekly && !show.quotaWeeklyIcon && !show.resetWeekly) continue;
     const fraction = number(bucket.remaining_fraction);
     if (fraction === null) continue;
     const percent = Math.round(fraction * 100);
@@ -285,10 +266,9 @@ function paintBase(text, tone, theme = 'light') {
   return code + text.replaceAll('\x1b[0m', code) + '\x1b[0m';
 }
 
-function quotaGroups(quota, model, now, countdown, showName = true, prefs = DEFAULT_SETTINGS) {
+function quotaGroups(quota, model, now, countdown, showName = true, show = MODES.standard) {
   const selected = currentGroup(model, quota);
   if (!selected) return [];
-  const { show } = prefs;
   const groups = new Map();
   const entries = Object.entries(quota && typeof quota === 'object' ? quota : {});
   const order = Object.keys(knownBuckets);
@@ -297,18 +277,36 @@ function quotaGroups(quota, model, now, countdown, showName = true, prefs = DEFA
     if (!bucket || typeof bucket !== 'object' || bucket.disabled === true) continue;
     const [group, kind] = knownBuckets[id] || [label(id) || 'Unknown', ''];
     if (group !== selected) continue;
-    if (kind === '5h' && !show.quota5h) continue;
-    if (kind === 'weekly' && !show.quotaWeekly) continue;
     const fraction = number(bucket.remaining_fraction);
     const amount = number(bucket.remaining_amount);
     const value = fraction !== null ? `${Math.round(fraction * 100)}%` : amount !== null ? `${formatTokens(amount)} units` : '--';
-    const labelMode = kind === '5h' ? prefs.quota5hLabel : kind === 'weekly' ? prefs.quotaWeeklyLabel : 'off';
-    const prefix = kind ? (WINDOW_LABELS[kind]?.[labelMode] ?? '') : '';
-    const showReset = countdown && (kind === '5h' ? show.reset5h : kind === 'weekly' ? show.resetWeekly : (show.reset5h || show.resetWeekly));
-    const part = `${prefix ? prefix + ' ' : ''}${value}${showReset ? resetText(bucket, now) : ''}`;
+    const parts = [];
+    if (kind === '5h') {
+      if (show.quota5hIcon) parts.push('🕔');
+      if (show.quota5h) parts.push(value);
+      if (countdown && show.reset5h) {
+        const rt = resetText(bucket, now).trim();
+        if (rt) parts.push(rt);
+      }
+    } else if (kind === 'weekly') {
+      if (show.quotaWeeklyIcon) parts.push('📅');
+      if (show.quotaWeekly) parts.push(value);
+      if (countdown && show.resetWeekly) {
+        const rt = resetText(bucket, now).trim();
+        if (rt) parts.push(rt);
+      }
+    } else {
+      parts.push(value);
+      if (countdown && (show.reset5h || show.resetWeekly)) {
+        const rt = resetText(bucket, now).trim();
+        if (rt) parts.push(rt);
+      }
+    }
+    if (!parts.length) continue;
     if (!groups.has(group)) groups.set(group, []);
-    groups.get(group).push(part);
+    groups.get(group).push(parts.join(' '));
   }
+  if (!groups.size && showName) return [selected];
   return [...groups].map(([name, parts]) => `${showName ? name + ' ' : ''}${parts.join(' ')}`);
 }
 
@@ -326,14 +324,16 @@ function clipText(text, budget) {
 }
 
 function fallbackStatusline(settings) {
-  const prefs = normalizeSettings(settings);
-  const { show } = prefs;
-  const ctxPrefix = CONTEXT_LABELS[prefs.contextLabel];
-  const cachePrefix = CACHE_LABELS[prefs.cacheLabel];
-  const parts = [];
-  if (show.context) parts.push((ctxPrefix ? `${ctxPrefix} --` : '--') + (show.capacity ? ' (--)' : ''));
-  if (show.cache) parts.push(cachePrefix ? `${cachePrefix} --` : '--');
-  if (!parts.length && show.quota && (show.quota5h || show.quotaWeekly)) parts.push('--');
+  const { show } = normalizeSettings(settings);
+  const ctxParts = [];
+  if (show.contextLabel) ctxParts.push('Ctx');
+  if (show.context) ctxParts.push('--');
+  if (show.capacity) ctxParts.push('(--)');
+  const cacheParts = [];
+  if (show.cacheLabel) cacheParts.push('Cache');
+  if (show.cache) cacheParts.push('--');
+  const parts = [ctxParts.join(' '), cacheParts.join(' ')].filter(Boolean);
+  if (!parts.length && (show.quota5h || show.quotaWeekly)) parts.push('--');
   return parts.join('  ');
 }
 
@@ -346,58 +346,56 @@ export function renderStatusline(payload = {}, { now = Date.now(), color = false
   const percentage = number(context.used_percentage);
   const size = number(context.context_window_size);
   const pct = percentage === null ? '--' : `${percentage.toFixed(1)}%`;
-  const ctxPrefix = CONTEXT_LABELS[prefs.contextLabel];
-  const contextBase = show.context ? (ctxPrefix ? `${ctxPrefix} ${pct}` : pct) : '';
-  const capacityText = show.context && show.capacity ? ` (${size > 0 ? formatTokens(size) : '--'})` : '';
+  const capStr = `(${size > 0 ? formatTokens(size) : '--'})`;
   const usage = context.current_usage;
-  const cachePrefix = CACHE_LABELS[prefs.cacheLabel];
-  let cacheBlock = '';
-  if (show.cache && usage && width >= 30) {
+  let cacheHit = null;
+  if (usage && width >= 30) {
     const input = number(usage.input_tokens);
     const cached = number(usage.cache_read_input_tokens);
-    const hit = input !== null && cached !== null && input + cached > 0
+    cacheHit = input !== null && cached !== null && input + cached > 0
       ? `${(cached / (input + cached) * 100).toFixed(1)}%` : '--';
-    cacheBlock = `${cachePrefix ? cachePrefix + ' ' : ''}${hit}${prefs.cache === 'dot' ? ' ●' : ''}`;
   }
-  // Do not imply that retained current_usage is a live reading while working.
-  const stateLabel = show.state && p.agent_state && p.agent_state !== 'idle' ? label(p.agent_state) : '';
-  const buildLeft = ({ withContext = true, withCapacity = true, withCache = true, withState = true, shortContext = false } = {}) => {
-    const parts = [];
-    if (withContext && show.context) {
-      const core = shortContext ? (prefs.contextLabel === 'en' ? `C ${pct}` : pct) : contextBase;
-      parts.push(core + (withCapacity ? capacityText : ''));
+
+  const buildLeft = ({ withContext = true, withCapacity = true, withCache = true, shortContext = false } = {}) => {
+    const ctxParts = [];
+    if (withContext && show.contextLabel) ctxParts.push(shortContext ? 'C' : 'Ctx');
+    if (withContext && show.context) ctxParts.push(pct);
+    if (withCapacity && show.capacity) ctxParts.push(capStr);
+    const cacheParts = [];
+    if (withCache && cacheHit !== null) {
+      if (show.cacheLabel) cacheParts.push('Cache');
+      if (show.cache) cacheParts.push(cacheHit);
+      if (cacheParts.length && prefs.cache === 'dot') cacheParts.push('●');
     }
-    if (withCache && cacheBlock) parts.push(cacheBlock);
-    let text = parts.join('  ');
-    if (withState && stateLabel) text = text ? `${text} | ${stateLabel}` : stateLabel;
-    return text;
-  };
-  const quotaEnabled = show.quota && (show.quota5h || show.quotaWeekly);
-  const buildRight = (countdown, showName = show.quotaGroup) => {
-    if (!quotaEnabled) return '';
-    const text = quotaGroups(p.quota, p.model, now, countdown, showName, prefs).join(' | ');
-    return text ? `${prefs.quota === 'dot' ? '● ' : ''}${text}` : '--';
+    return [ctxParts.join(' '), cacheParts.join(' ')].filter(Boolean).join('  ');
   };
 
-  let leftOpts = { withContext: true, withCapacity: true, withCache: true, withState: true, shortContext: false };
+  const anyRightEnabled = show.quotaGroup || show.quota5hIcon || show.quota5h || show.reset5h || show.quotaWeeklyIcon || show.quotaWeekly || show.resetWeekly;
+  const buildRight = (countdown, showName = show.quotaGroup) => {
+    if (!anyRightEnabled) return '';
+    const text = quotaGroups(p.quota, p.model, now, countdown, showName, show).join(' | ');
+    if (text) return `${prefs.quota === 'dot' ? '● ' : ''}${text}`;
+    return !currentGroup(p.model, p.quota) && (show.quota5h || show.quotaWeekly) ? '--' : '';
+  };
+
+  let leftOpts = { withContext: true, withCapacity: true, withCache: true, shortContext: false };
   let left = buildLeft(leftOpts);
   let right = buildRight(width >= 70, show.quotaGroup);
   const fits = () => displayWidth(left) + (left && right ? 2 : 0) + displayWidth(right) <= width;
 
   // Keep one row: reduce optional detail before sacrificing context or quotas.
-  if (!fits()) { leftOpts = { ...leftOpts, withState: false }; left = buildLeft(leftOpts); }
   if (!fits()) right = buildRight(false, show.quotaGroup);
-  if (!fits() && show.context) { leftOpts = { ...leftOpts, withCache: false }; left = buildLeft(leftOpts); }
-  if (!fits()) { leftOpts = { ...leftOpts, withCapacity: false }; left = buildLeft(leftOpts); }
+  if (!fits() && (show.context || show.contextLabel || show.capacity)) { leftOpts = { ...leftOpts, withCache: false }; left = buildLeft(leftOpts); }
+  if (!fits() && (show.context || show.contextLabel)) { leftOpts = { ...leftOpts, withCapacity: false }; left = buildLeft(leftOpts); }
   if (!fits()) right = buildRight(false, false);
   if (!fits()) {
     if (right) {
-      leftOpts = { withContext: width >= 12 && show.context, withCapacity: false, withCache: false, withState: false, shortContext: true };
+      leftOpts = { withContext: width >= 12 && (show.context || show.contextLabel), withCapacity: false, withCache: false, shortContext: true };
       left = buildLeft(leftOpts);
       const budget = Math.max(1, width - displayWidth(left) - (left ? 1 : 0));
       right = clipText(right, budget);
     } else {
-      leftOpts = { ...leftOpts, withCache: show.context ? false : leftOpts.withCache, shortContext: true };
+      leftOpts = { ...leftOpts, withCache: (show.context || show.contextLabel) ? false : leftOpts.withCache, shortContext: true };
       left = buildLeft(leftOpts);
       if (!fits()) left = clipText(left, width);
     }
@@ -411,22 +409,27 @@ export function renderStatusline(payload = {}, { now = Date.now(), color = false
     const age = number(lastResponseAtMs) !== null ? now - lastResponseAtMs : null;
     const cacheTone = age !== null && age >= 240000 ? 'red' : age !== null && age >= 180000 ? 'amber' : 'neutral';
     if (left) {
-      const parts = [];
+      const ctxParts = [];
+      if (leftOpts.withContext && show.contextLabel) ctxParts.push(leftOpts.shortContext ? 'C' : 'Ctx');
       if (leftOpts.withContext && show.context) {
-        let core = leftOpts.shortContext ? (prefs.contextLabel === 'en' ? `C ${pct}` : pct) : contextBase;
-        if (prefs.context === 'text' && percentage !== null && percentage >= 75) {
-          core = core.replace(pct, tint(pct, percentage >= 90 ? 'red' : 'amber', theme));
+        const pctColored = prefs.context === 'text' && percentage !== null && percentage >= 75
+          ? tint(pct, percentage >= 90 ? 'red' : 'amber', theme) : pct;
+        ctxParts.push(pctColored);
+      }
+      if (leftOpts.withCapacity && show.capacity) ctxParts.push(capStr);
+
+      let cacheColored = '';
+      if (leftOpts.withCache && cacheHit !== null) {
+        const cacheParts = [];
+        if (show.cacheLabel) cacheParts.push('Cache');
+        if (show.cache) cacheParts.push(cacheHit);
+        if (cacheParts.length) {
+          cacheColored = cacheParts.join(' ');
+          if (prefs.cache === 'dot') cacheColored += ` ${tint('●', cacheTone, theme)}`;
+          else if (prefs.cache === 'text' && cacheTone !== 'neutral') cacheColored = tint(cacheColored, cacheTone, theme);
         }
-        parts.push(core + (leftOpts.withCapacity ? capacityText : ''));
       }
-      if (leftOpts.withCache && cacheBlock) {
-        let coloredCache = cacheBlock;
-        if (prefs.cache === 'dot') coloredCache = coloredCache.replace('●', tint('●', cacheTone, theme));
-        else if (prefs.cache === 'text' && cacheTone !== 'neutral') coloredCache = tint(coloredCache, cacheTone, theme);
-        parts.push(coloredCache);
-      }
-      let coloredLeft = parts.join('  ');
-      if (leftOpts.withState && stateLabel) coloredLeft = coloredLeft ? `${coloredLeft} | ${stateLabel}` : stateLabel;
+      const coloredLeft = [ctxParts.join(' '), cacheColored].filter(Boolean).join('  ');
       if (coloredLeft.replace(/\x1b\[[\d;]+m/g, '') === left) left = coloredLeft;
       if (baseTone) left = paintBase(left, baseTone, theme);
     }
@@ -447,7 +450,7 @@ export async function main() {
     const payload = JSON.parse(input);
     const color = !('NO_COLOR' in process.env) && !process.argv.includes('--plain') && settings.textColor !== 'plain';
     const theme = color ? readTheme() : 'light';
-    const lastResponseAtMs = settings.show.cache && color && settings.cache !== 'off' ? await readLastResponseAt(payload) : null;
+    const lastResponseAtMs = (settings.show.cache || settings.show.cacheLabel) && color && settings.cache !== 'off' ? await readLastResponseAt(payload) : null;
     const modelLine = renderModelLine(payload, color, theme, settings.textColor);
     const statusLine = renderStatusline(payload, { color, lastResponseAtMs, settings, theme });
     process.stdout.write(statusLine ? `${modelLine}\n${statusLine}\n` : `${modelLine}\n`);

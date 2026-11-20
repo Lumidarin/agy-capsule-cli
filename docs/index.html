@@ -19,6 +19,7 @@
     --accent-hover: #354850;
     --ok: #2e7d52;
     --radius: 12px;
+    --ctrl-h: 32px;
     --mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'SFMono-Regular', Menlo, monospace;
   }
   * { box-sizing: border-box; }
@@ -28,9 +29,7 @@
     color: var(--text);
     font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 20px 56px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 20px 48px; }
 
   header {
     display: flex;
@@ -45,6 +44,8 @@
 
   .pill-group {
     display: inline-flex;
+    align-items: center;
+    height: var(--ctrl-h);
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 9px;
@@ -52,15 +53,19 @@
     gap: 2px;
   }
   .pill-btn {
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
     border: 0;
     background: transparent;
     color: var(--muted);
     font: inherit;
     font-size: 12.5px;
     font-weight: 500;
-    padding: 5px 10px;
+    padding: 0 10px;
     border-radius: 7px;
     cursor: pointer;
+    white-space: nowrap;
     transition: background .15s, color .15s;
   }
   .pill-btn:hover { color: var(--text); }
@@ -95,16 +100,17 @@
   .width-control {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    height: var(--ctrl-h);
+    gap: 7px;
+    font-size: 12.5px;
     color: var(--muted);
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 4px 10px;
+    border-radius: 9px;
+    padding: 0 10px;
   }
-  .width-control input { width: 84px; accent-color: var(--accent); cursor: pointer; }
-  .width-val { font-family: var(--mono); min-width: 28px; text-align: right; color: var(--text); }
+  .width-control input { width: 80px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .width-val { font-family: var(--mono); font-size: 12px; min-width: 26px; text-align: right; color: var(--text); }
 
   .terminals { display: grid; gap: 10px; }
   .terminal {
@@ -115,39 +121,52 @@
   }
   .terminal.light { background: #faf9f6; color: #161616; border-color: #dcd7ce; }
   .terminal.dark { background: #282c34; color: #f1f3f5; border-color: #3e4451; }
-  .terminal-tag {
+  .terminal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 11px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     margin-bottom: 8px;
-    opacity: 0.65;
+    opacity: 0.62;
   }
+  .terminal-tag { text-transform: uppercase; }
   .terminal pre {
     margin: 0;
-    font: 15px/1.65 var(--mono);
+    font: 15px/1.75 var(--mono);
     white-space: pre;
   }
   .terminal pre .empty-hint { opacity: 0.5; font-style: italic; }
 
-  .controls-card {
+  /* Direct-manipulation clickable tokens in Edit mode */
+  .tok {
+    display: inline;
+    border-radius: 4px;
+    padding: 1px 2px;
+    margin: -1px -2px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity .14s, background .14s;
+  }
+  .terminal.dark .tok:hover { background: rgba(255, 255, 255, 0.13); }
+  .terminal.light .tok:hover { background: rgba(76, 98, 107, 0.14); }
+  .tok.off { opacity: 0.25; }
+  .tok.off:hover { opacity: 0.58; }
+
+  .styles-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px 18px;
+    padding: 14px 18px;
     margin-bottom: 14px;
-  }
-  .controls-bottom {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+    gap: 12px 18px;
   }
-  .color-row {
+  .style-item {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -155,118 +174,6 @@
     font-weight: 600;
     color: var(--muted);
   }
-
-  /* Spatial statusline strip: left items on left, right items on right */
-  .strip {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-  .side {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-  }
-  .cluster {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 4px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 4px 5px;
-  }
-  .cluster.disabled { opacity: 0.42; }
-
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    border: 1.5px solid var(--border-strong);
-    background: var(--surface);
-    color: var(--muted);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 4px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    transition: background .14s, border-color .14s, color .14s, box-shadow .14s;
-  }
-  .chip:hover:not(:disabled) {
-    border-color: var(--accent-border);
-    color: var(--text);
-  }
-  .chip.on {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent-hover);
-    font-weight: 600;
-  }
-  .chip:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  /* Dropdown chip */
-  .dd {
-    position: relative;
-    display: inline-flex;
-  }
-  .dd-caret {
-    font-size: 10px;
-    line-height: 1;
-    opacity: 0.75;
-    margin-left: 1px;
-  }
-  .dd-menu {
-    position: absolute;
-    top: calc(100% + 5px);
-    left: 0;
-    min-width: 112px;
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    border-radius: 9px;
-    padding: 4px;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
-    z-index: 40;
-    display: none;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .dd.open .dd-menu { display: flex; }
-  .dd-item {
-    border: 0;
-    background: transparent;
-    color: var(--text);
-    font: inherit;
-    font-size: 12.5px;
-    text-align: left;
-    padding: 6px 9px;
-    border-radius: 6px;
-    cursor: pointer;
-    white-space: nowrap;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-  .dd-item:hover { background: var(--surface-2); }
-  .dd-item.selected {
-    background: var(--accent-soft);
-    color: var(--accent-hover);
-    font-weight: 600;
-  }
-  .dd-check { font-size: 11px; opacity: 0; }
-  .dd-item.selected .dd-check { opacity: 1; }
-
-  .side.right .dd-menu { left: auto; right: 0; }
 
   .output-card {
     background: var(--surface);
@@ -328,11 +235,7 @@
   }
   .output-hint { margin: 9px 0 0; font-size: 12.5px; color: var(--muted); }
   footer {
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 10px;
+    margin-top: 18px;
     font-size: 12.5px;
     color: var(--muted);
   }
@@ -343,7 +246,7 @@
   <header>
     <div>
       <h1>Capsule CLI Configurator</h1>
-      <p class="subtitle" data-i18n="subtitle">点击下方方块开关每一项、点 ▾ 下拉选样式，一键复制指令发给 Agent 生效。</p>
+      <p class="subtitle" data-i18n="subtitle">在预览中直接点击各项开关显示，调好后复制指令发给 Agent 生效。</p>
     </div>
     <div class="pill-group" role="group" aria-label="Language">
       <button class="pill-btn active" data-lang="zh">中文</button>
@@ -358,7 +261,6 @@
           <button class="pill-btn active" data-scenario="normal" data-i18n="scNormal">正常</button>
           <button class="pill-btn" data-scenario="yellow" data-i18n="scYellow">黄提醒</button>
           <button class="pill-btn" data-scenario="red" data-i18n="scRed">红告警</button>
-          <button class="pill-btn" data-scenario="working" data-i18n="scWorking">运行中</button>
           <button class="pill-btn" data-scenario="claude">Claude</button>
           <button class="pill-btn" data-scenario="argon">Argon</button>
         </div>
@@ -374,63 +276,45 @@
           <input id="width-slider" type="range" min="48" max="120" value="104">
           <span class="width-val" id="width-val">104</span>
         </label>
+        <div class="pill-group" role="group" aria-label="View mode">
+          <button class="pill-btn active" data-view="edit" data-i18n="viewEdit">编辑</button>
+          <button class="pill-btn" data-view="preview" data-i18n="viewPreview">预览</button>
+        </div>
       </div>
     </div>
     <div class="terminals" id="terminals"></div>
   </section>
 
-  <section class="controls-card">
-    <div class="strip">
-      <!-- Left side in exact statusline order -->
-      <div class="side left">
-        <div class="cluster">
-          <div class="dd" data-select="contextLabel" data-parent="context"></div>
-          <button class="chip" type="button" data-show="context" data-i18n="chipCtx">占用 %</button>
-          <button class="chip" type="button" data-show="capacity" data-parent="context" data-i18n="chipCap">容量</button>
-          <div class="dd" data-select="context" data-parent="context"></div>
-        </div>
-
-        <div class="cluster">
-          <div class="dd" data-select="cacheLabel" data-parent="cache"></div>
-          <button class="chip" type="button" data-show="cache" data-i18n="chipCache">命中 %</button>
-          <div class="dd" data-select="cache" data-parent="cache"></div>
-        </div>
-
-        <div class="cluster">
-          <button class="chip" type="button" data-show="state" data-i18n="chipState">状态</button>
-        </div>
-      </div>
-
-      <!-- Right side in exact statusline order -->
-      <div class="side right">
-        <div class="cluster">
-          <button class="chip" type="button" data-show="quota" data-i18n="chipQuota">额度</button>
-          <div class="dd" data-select="quota" data-parent="quota"></div>
-          <button class="chip" type="button" data-show="quotaGroup" data-parent="quota" data-i18n="chipGroup">组名</button>
-        </div>
-
-        <div class="cluster" data-parent="quota">
-          <div class="dd" data-select="quota5hLabel" data-parent="quota,quota5h"></div>
-          <button class="chip" type="button" data-show="quota5h" data-parent="quota" data-i18n="chipQ5h">5h</button>
-          <button class="chip" type="button" data-show="reset5h" data-parent="quota,quota5h" data-i18n="chipR5h">倒计时</button>
-        </div>
-
-        <div class="cluster" data-parent="quota">
-          <div class="dd" data-select="quotaWeeklyLabel" data-parent="quota,quotaWeekly"></div>
-          <button class="chip" type="button" data-show="quotaWeekly" data-parent="quota" data-i18n="chipQw">周</button>
-          <button class="chip" type="button" data-show="resetWeekly" data-parent="quota,quotaWeekly" data-i18n="chipRw">倒计时</button>
-        </div>
+  <section class="styles-card">
+    <div class="style-item">
+      <span data-i18n="ctxAlert">Ctx 提醒</span>
+      <div class="pill-group" data-select="context">
+        <button class="pill-btn" data-val="text" data-i18n="optText">文字</button>
+        <button class="pill-btn" data-val="off" data-i18n="optOff">关闭</button>
       </div>
     </div>
-
-    <div class="controls-bottom">
-      <div class="color-row">
-        <span data-i18n="textColorLabel">正文颜色：</span>
-        <div class="pill-group" data-select="textColor">
-          <button class="pill-btn" data-val="inherit" data-i18n="tcInherit" title="跟随终端 / color scheme 正文色">跟随正文</button>
-          <button class="pill-btn" data-val="fixed" data-i18n="tcFixed" title="浅色固定黑、深色固定白，不被彩色主题染色">固定黑白</button>
-          <button class="pill-btn" data-val="muted" data-i18n="tcMuted" title="指标行正文也采用柔和灰，仅黄/红告警突出">柔和灰</button>
-        </div>
+    <div class="style-item">
+      <span data-i18n="cacheAlert">Cache 提醒</span>
+      <div class="pill-group" data-select="cache">
+        <button class="pill-btn" data-val="dot" data-i18n="optDot">圆点 ●</button>
+        <button class="pill-btn" data-val="text" data-i18n="optText">文字</button>
+        <button class="pill-btn" data-val="off" data-i18n="optOff">关闭</button>
+      </div>
+    </div>
+    <div class="style-item">
+      <span data-i18n="quotaAlert">额度提醒</span>
+      <div class="pill-group" data-select="quota">
+        <button class="pill-btn" data-val="dot" data-i18n="optDot">圆点 ●</button>
+        <button class="pill-btn" data-val="text" data-i18n="optText">文字</button>
+        <button class="pill-btn" data-val="off" data-i18n="optOff">关闭</button>
+      </div>
+    </div>
+    <div class="style-item">
+      <span data-i18n="textColorLabel">正文颜色</span>
+      <div class="pill-group" data-select="textColor">
+        <button class="pill-btn" data-val="inherit" data-i18n="tcInherit" title="跟随终端 / color scheme 正文色">跟随正文</button>
+        <button class="pill-btn" data-val="fixed" data-i18n="tcFixed" title="浅色固定黑、深色固定白，不被彩色主题染色">固定黑白</button>
+        <button class="pill-btn" data-val="muted" data-i18n="tcMuted" title="指标行正文也采用柔和灰，仅黄/红告警突出">柔和灰</button>
       </div>
     </div>
   </section>
@@ -445,40 +329,32 @@
     </div>
     <div class="code-wrap">
       <pre class="output-box" id="output-box"></pre>
-      <button class="copy-icon-btn" id="copy-btn" type="button" aria-label="Copy" title="复制">
-        <svg id="copy-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      </button>
+      <button class="copy-icon-btn" id="copy-btn" type="button" aria-label="Copy" title="复制"></button>
     </div>
     <p class="output-hint" id="output-hint"></p>
   </section>
 
   <footer>
     <span data-i18n="footerNote">实际终端字体宽度可能略有差异。</span>
-    <span>
-      <a href="https://github.com/Lumidarin/agy-capsule-cli" target="_blank" rel="noreferrer">GitHub</a>
-      · <a href="preview.html" data-i18n="staticPreview">静态预览页</a>
-    </span>
   </footer>
 </div>
 
 <script>
 const MODES = {
   standard: {
-    context: true, capacity: true,
-    cache: true, state: true,
-    quota: true, quotaGroup: true, quota5h: true, quotaWeekly: true,
-    reset5h: true, resetWeekly: true,
+    contextLabel: true, context: true, capacity: true,
+    cacheLabel: true, cache: true,
+    quotaGroup: true,
+    quota5hIcon: true, quota5h: true, reset5h: true,
+    quotaWeeklyIcon: true, quotaWeekly: true, resetWeekly: true,
   },
   compact: {
-    context: true, capacity: true,
-    cache: false, state: false,
-    quota: true, quotaGroup: false, quota5h: true, quotaWeekly: true,
-    reset5h: true, resetWeekly: true,
+    contextLabel: false, context: true, capacity: true,
+    cacheLabel: false, cache: false,
+    quotaGroup: false,
+    quota5hIcon: true, quota5h: true, reset5h: true,
+    quotaWeeklyIcon: true, quotaWeekly: true, resetWeekly: true,
   },
-};
-const MODE_LABELS = {
-  standard: { contextLabel: 'en', cacheLabel: 'en' },
-  compact: { contextLabel: 'off', cacheLabel: 'off' },
 };
 const SHOW_KEYS = Object.keys(MODES.standard);
 const DEFAULTS = {
@@ -487,21 +363,11 @@ const DEFAULTS = {
   context: 'text',
   cache: 'dot',
   quota: 'dot',
-  contextLabel: 'en',
-  cacheLabel: 'en',
-  quota5hLabel: 'icon',
-  quotaWeeklyLabel: 'icon',
   show: { ...MODES.standard },
 };
 const PALETTES = {
   light: { body: 'rgb(22,22,22)', muted: 'rgb(91,107,115)', neutral: 'rgb(138,144,151)', amber: 'rgb(152,97,0)', red: 'rgb(208,42,48)' },
   dark: { body: 'rgb(241,243,245)', muted: 'rgb(185,195,208)', neutral: 'rgb(185,195,208)', amber: 'rgb(255,209,102)', red: 'rgb(255,133,133)' },
-};
-const CONTEXT_LABELS = { en: 'Ctx', zh: '上下文', off: '' };
-const CACHE_LABELS = { en: 'Cache', zh: '缓存', off: '' };
-const WINDOW_LABELS = {
-  '5h': { icon: '🕔', short: '5h', zh: '5小时', off: '' },
-  weekly: { icon: '📅', short: 'w', zh: '周', off: '' },
 };
 const KNOWN_BUCKETS = {
   'gemini-5h': ['Gemini', '5h'],
@@ -539,15 +405,6 @@ const SCENARIOS = {
       quota: { 'gemini-5h': { remaining_fraction: 0.96, reset_in_seconds: 8760 }, 'gemini-weekly': { remaining_fraction: 0.10, reset_in_seconds: 342000 } },
     },
   },
-  working: {
-    ageSec: 45,
-    payload: {
-      model: { id: 'gemini-hydrogen', display_name: 'Gemini 4 Hydrogen', effort: 'medium' },
-      agent_state: 'working',
-      context_window: { used_percentage: 42.8, context_window_size: 1048576, current_usage: { input_tokens: 880, cache_read_input_tokens: 9120 } },
-      quota: { 'gemini-5h': { remaining_fraction: 0.84, reset_in_seconds: 10200 }, 'gemini-weekly': { remaining_fraction: 0.62, reset_in_seconds: 410000 } },
-    },
-  },
   claude: {
     ageSec: 90,
     payload: {
@@ -570,13 +427,14 @@ const SCENARIOS = {
 
 const I18N = {
   zh: {
-    subtitle: '点击下方方块开关每一项、点 ▾ 下拉选样式，一键复制指令发给 Agent 生效。',
+    subtitle: '在预览中直接点击各项开关显示，调好后复制指令发给 Agent 生效。',
     themeBoth: '日 + 夜', themeLight: '浅色', themeDark: '深色',
-    scNormal: '正常', scYellow: '黄提醒', scRed: '红告警', scWorking: '运行中',
-    widthLabel: '终端宽度',
-    textColorLabel: '正文颜色：', tcInherit: '跟随正文', tcFixed: '固定黑白', tcMuted: '柔和灰',
-    chipCtx: '占用 %', chipCap: '容量', chipCache: '命中 %', chipState: '状态',
-    chipQuota: '额度', chipGroup: '组名', chipQ5h: '5h', chipR5h: '倒计时', chipQw: '周', chipRw: '倒计时',
+    scNormal: '正常', scYellow: '黄提醒', scRed: '红告警',
+    widthLabel: '终端宽度', viewEdit: '编辑', viewPreview: '预览',
+    editHint: '点击任意项开关显示（暗淡 = 已隐藏）',
+    ctxAlert: 'Ctx 提醒', cacheAlert: 'Cache 提醒', quotaAlert: '额度提醒', textColorLabel: '正文颜色',
+    optDot: '圆点 ●', optText: '文字', optOff: '关闭',
+    tcInherit: '跟随正文', tcFixed: '固定黑白', tcMuted: '柔和灰',
     tabAgent: '发给 Agent (/capsule-guide)', tabCli: '终端命令 (settings.mjs)',
     copyTip: '复制', copiedTip: '已复制',
     hintAgent: '直接粘贴到 Antigravity 对话中发送，已安装 /capsule-guide skill 的 Agent 会自动调用本地 helper 生效。',
@@ -585,54 +443,16 @@ const I18N = {
     dayTag: 'Day / 浅色背景', nightTag: 'Night / 深色背景',
     emptyLine: '（第 2 行所有指标均已隐藏，仅保留第 1 行模型提示）',
     footerNote: '实际终端字体宽度可能略有差异。',
-    staticPreview: '静态预览页',
-    dd: {
-      contextLabel: [
-        { val: 'en', chip: 'Ctx', menu: 'Ctx' },
-        { val: 'zh', chip: '上下文', menu: '上下文' },
-        { val: 'off', chip: '无', menu: '隐藏前缀' },
-      ],
-      context: [
-        { val: 'text', chip: '变色', menu: '文字变色 (≥75%/90%)' },
-        { val: 'off', chip: '不提醒', menu: '关闭提醒' },
-      ],
-      cacheLabel: [
-        { val: 'en', chip: 'Cache', menu: 'Cache' },
-        { val: 'zh', chip: '缓存', menu: '缓存' },
-        { val: 'off', chip: '无', menu: '隐藏前缀' },
-      ],
-      cache: [
-        { val: 'dot', chip: '●', menu: '圆点提醒 ● (3m/4m)' },
-        { val: 'text', chip: '变色', menu: '文字变色 (3m/4m)' },
-        { val: 'off', chip: '不提醒', menu: '关闭提醒' },
-      ],
-      quota: [
-        { val: 'dot', chip: '●', menu: '圆点提醒 ● (≤25%/10%)' },
-        { val: 'text', chip: '变色', menu: '文字变色 (≤25%/10%)' },
-        { val: 'off', chip: '不提醒', menu: '关闭提醒' },
-      ],
-      quota5hLabel: [
-        { val: 'icon', chip: '🕔', menu: '🕔 图标' },
-        { val: 'short', chip: '5h', menu: '5h' },
-        { val: 'zh', chip: '5小时', menu: '5小时' },
-        { val: 'off', chip: '无', menu: '隐藏标识' },
-      ],
-      quotaWeeklyLabel: [
-        { val: 'icon', chip: '📅', menu: '📅 图标' },
-        { val: 'short', chip: 'w', menu: 'w' },
-        { val: 'zh', chip: '周', menu: '周' },
-        { val: 'off', chip: '无', menu: '隐藏标识' },
-      ],
-    },
   },
   en: {
-    subtitle: 'Click chips to toggle items, click ▾ to pick styles, then copy one command for your Agent.',
+    subtitle: 'Click items directly in the statusline to toggle them, then copy one command for your Agent.',
     themeBoth: 'Day + Night', themeLight: 'Light', themeDark: 'Dark',
-    scNormal: 'Normal', scYellow: 'Yellow', scRed: 'Red', scWorking: 'Working',
-    widthLabel: 'Width',
-    textColorLabel: 'Body color:', tcInherit: 'Follow Body', tcFixed: 'Fixed B/W', tcMuted: 'Muted Gray',
-    chipCtx: 'Used %', chipCap: 'Cap', chipCache: 'Hit %', chipState: 'State',
-    chipQuota: 'Quota', chipGroup: 'Group', chipQ5h: '5h', chipR5h: 'Reset', chipQw: 'Week', chipRw: 'Reset',
+    scNormal: 'Normal', scYellow: 'Yellow', scRed: 'Red',
+    widthLabel: 'Width', viewEdit: 'Edit', viewPreview: 'Preview',
+    editHint: 'Click any item to toggle (dimmed = hidden)',
+    ctxAlert: 'Ctx Alert', cacheAlert: 'Cache Alert', quotaAlert: 'Quota Alert', textColorLabel: 'Body Color',
+    optDot: 'Dot ●', optText: 'Text', optOff: 'Off',
+    tcInherit: 'Follow Body', tcFixed: 'Fixed B/W', tcMuted: 'Muted Gray',
     tabAgent: 'Send to Agent (/capsule-guide)', tabCli: 'Terminal CLI (settings.mjs)',
     copyTip: 'Copy', copiedTip: 'Copied',
     hintAgent: 'Paste directly into Antigravity chat. With /capsule-guide installed, your agent applies it via the local helper.',
@@ -641,50 +461,12 @@ const I18N = {
     dayTag: 'Day / Light background', nightTag: 'Night / Dark background',
     emptyLine: '(All row-2 metrics hidden; only row-1 model bar is rendered)',
     footerNote: 'Terminal font widths may vary.',
-    staticPreview: 'Static preview',
-    dd: {
-      contextLabel: [
-        { val: 'en', chip: 'Ctx', menu: 'Ctx' },
-        { val: 'zh', chip: '上下文', menu: '上下文' },
-        { val: 'off', chip: 'Off', menu: 'Hide label' },
-      ],
-      context: [
-        { val: 'text', chip: 'Alert', menu: 'Text alert (≥75%/90%)' },
-        { val: 'off', chip: 'Off', menu: 'Alert off' },
-      ],
-      cacheLabel: [
-        { val: 'en', chip: 'Cache', menu: 'Cache' },
-        { val: 'zh', chip: '缓存', menu: '缓存' },
-        { val: 'off', chip: 'Off', menu: 'Hide label' },
-      ],
-      cache: [
-        { val: 'dot', chip: '●', menu: 'Dot alert ● (3m/4m)' },
-        { val: 'text', chip: 'Alert', menu: 'Text alert (3m/4m)' },
-        { val: 'off', chip: 'Off', menu: 'Alert off' },
-      ],
-      quota: [
-        { val: 'dot', chip: '●', menu: 'Dot alert ● (≤25%/10%)' },
-        { val: 'text', chip: 'Alert', menu: 'Text alert (≤25%/10%)' },
-        { val: 'off', chip: 'Off', menu: 'Alert off' },
-      ],
-      quota5hLabel: [
-        { val: 'icon', chip: '🕔', menu: '🕔 Icon' },
-        { val: 'short', chip: '5h', menu: '5h' },
-        { val: 'zh', chip: '5小时', menu: '5小时' },
-        { val: 'off', chip: 'Off', menu: 'Hide prefix' },
-      ],
-      quotaWeeklyLabel: [
-        { val: 'icon', chip: '📅', menu: '📅 Icon' },
-        { val: 'short', chip: 'w', menu: 'w' },
-        { val: 'zh', chip: '周', menu: '周' },
-        { val: 'off', chip: 'Off', menu: 'Hide prefix' },
-      ],
-    },
   },
 };
 
 let lang = 'zh';
 let viewTheme = 'dark';
+let viewMode = 'edit';
 let scenarioKey = 'normal';
 let outputTab = 'agent';
 let termWidth = 104;
@@ -711,13 +493,13 @@ function formatTokens(n) {
 function resetText(bucket) {
   const seconds = bucket.reset_in_seconds;
   if (seconds == null) return '';
-  if (seconds <= 0) return ' (due)';
-  if (seconds < 60) return ' (<1m)';
+  if (seconds <= 0) return '(due)';
+  if (seconds < 60) return '(<1m)';
   const minutes = Math.ceil(seconds / 60);
-  if (minutes < 60) return ` (${minutes}m)`;
+  if (minutes < 60) return `(${minutes}m)`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return ` (${hours}h ${minutes % 60}m)`;
-  return ` (${Math.floor(hours / 24)}d ${hours % 24}h)`;
+  if (hours < 24) return `(${hours}h ${minutes % 60}m)`;
+  return `(${Math.floor(hours / 24)}d ${hours % 24}h)`;
 }
 function currentGroup(model, quota) {
   const name = `${model?.id || ''} ${model?.display_name || ''}`.toLowerCase();
@@ -732,8 +514,8 @@ function quotaTone(payload, show) {
   for (const [id, bucket] of Object.entries(payload.quota || {})) {
     if (!bucket || bucket.disabled === true || KNOWN_BUCKETS[id]?.[0] !== selected) continue;
     const kind = KNOWN_BUCKETS[id][1];
-    if (kind === '5h' && !show.quota5h) continue;
-    if (kind === 'weekly' && !show.quotaWeekly) continue;
+    if (kind === '5h' && !show.quota5h && !show.quota5hIcon && !show.reset5h) continue;
+    if (kind === 'weekly' && !show.quotaWeekly && !show.quotaWeeklyIcon && !show.resetWeekly) continue;
     const pct = Math.round(bucket.remaining_fraction * 100);
     const tone = pct <= 10 ? 'red' : pct <= 25 ? 'amber' : 'neutral';
     if (kind === 'weekly' && tone === 'red') return 'red';
@@ -750,73 +532,152 @@ function renderModelLineHtml(payload, theme) {
   const line = left + ' '.repeat(width - left.length - right.length) + right;
   return span(line, 'muted', theme);
 }
-function renderStatusHtml(payload, ageSec, theme) {
+
+function tok(key, html, on) {
+  return `<span class="tok ${on ? 'on' : 'off'}" data-show="${key}">${html}</span>`;
+}
+
+function renderEditRowHtml(payload, ageSec, theme) {
   const { show } = state;
   const width = Math.max(1, termWidth - 2);
   const ctx = payload.context_window;
   const pct = `${ctx.used_percentage.toFixed(1)}%`;
-  const ctxPrefix = CONTEXT_LABELS[state.contextLabel] || '';
-  const contextBase = show.context ? (ctxPrefix ? `${ctxPrefix} ${pct}` : pct) : '';
-  const capacityText = show.context && show.capacity ? ` (${formatTokens(ctx.context_window_size)})` : '';
+  const cap = `(${formatTokens(ctx.context_window_size)})`;
   const u = ctx.current_usage;
-  const cachePrefix = CACHE_LABELS[state.cacheLabel] || '';
-  let cacheBlock = '';
-  if (show.cache && u && width >= 30) {
-    const hit = `${(u.cache_read_input_tokens / (u.input_tokens + u.cache_read_input_tokens) * 100).toFixed(1)}%`;
-    cacheBlock = `${cachePrefix ? cachePrefix + ' ' : ''}${hit}${state.cache === 'dot' ? ' ●' : ''}`;
+  const hit = `${(u.cache_read_input_tokens / (u.input_tokens + u.cache_read_input_tokens) * 100).toFixed(1)}%`;
+  const cacheTone = ageSec >= 240 ? 'red' : ageSec >= 180 ? 'amber' : 'neutral';
+
+  const pctHtml = state.context === 'text' && ctx.used_percentage >= 75
+    ? span(pct, ctx.used_percentage >= 90 ? 'red' : 'amber', theme) : esc(pct);
+  const ctxPlain = `Ctx ${pct} ${cap}`;
+  const ctxHtml = `${tok('contextLabel', 'Ctx', show.contextLabel)} ${tok('context', pctHtml, show.context)} ${tok('capacity', esc(cap), show.capacity)}`;
+
+  const cacheTextColor = state.cache === 'text' && cacheTone !== 'neutral';
+  const cacheLabelHtml = cacheTextColor ? span('Cache', cacheTone, theme) : 'Cache';
+  const cacheHitHtml = cacheTextColor ? span(hit, cacheTone, theme) : esc(hit);
+  const cacheActive = show.cache || show.cacheLabel;
+  const cacheDotPlain = state.cache === 'dot' ? ' ●' : '';
+  const cacheDotHtml = state.cache === 'dot'
+    ? ` <span style="opacity:${cacheActive ? 1 : 0.25}">${span('●', cacheTone, theme)}</span>` : '';
+  const cachePlain = `Cache ${hit}${cacheDotPlain}`;
+  const cacheHtml = `${tok('cacheLabel', cacheLabelHtml, show.cacheLabel)} ${tok('cache', cacheHitHtml, show.cache)}${cacheDotHtml}`;
+
+  const leftPlain = `${ctxPlain}  ${cachePlain}`;
+  const leftHtml = `${ctxHtml}  ${cacheHtml}`;
+
+  const selected = currentGroup(payload.model, payload.quota);
+  const rightPlainParts = [];
+  const rightHtmlParts = [];
+  const anyRightOn = show.quotaGroup || show.quota5hIcon || show.quota5h || show.reset5h || show.quotaWeeklyIcon || show.quotaWeekly || show.resetWeekly;
+  if (state.quota === 'dot') {
+    rightPlainParts.push('●');
+    rightHtmlParts.push(`<span style="opacity:${anyRightOn ? 1 : 0.25}">${span('●', quotaTone(payload, show), theme)}</span>`);
   }
-  const stateLabel = show.state && payload.agent_state !== 'idle' ? payload.agent_state : '';
-  const buildLeft = (opts) => {
-    const parts = [];
-    if (opts.withContext && show.context) {
-      const core = opts.shortContext ? (state.contextLabel === 'en' ? `C ${pct}` : pct) : contextBase;
-      parts.push(core + (opts.withCapacity ? capacityText : ''));
+  rightPlainParts.push(selected);
+  rightHtmlParts.push(tok('quotaGroup', esc(selected), show.quotaGroup));
+
+  for (const [id, bucket] of Object.entries(payload.quota)) {
+    const meta = KNOWN_BUCKETS[id];
+    if (!meta || meta[0] !== selected || bucket.disabled) continue;
+    const kind = meta[1];
+    const pctNum = Math.round(bucket.remaining_fraction * 100);
+    const valStr = `${pctNum}%`;
+    const valHtml = state.quota === 'text' && pctNum <= 25
+      ? span(valStr, pctNum <= 10 ? 'red' : 'amber', theme) : esc(valStr);
+    const rt = resetText(bucket);
+    if (kind === '5h') {
+      rightPlainParts.push('🕔', valStr, rt);
+      rightHtmlParts.push(
+        tok('quota5hIcon', '🕔', show.quota5hIcon),
+        tok('quota5h', valHtml, show.quota5h),
+        tok('reset5h', esc(rt), show.reset5h),
+      );
+    } else if (kind === 'weekly') {
+      rightPlainParts.push('📅', valStr, rt);
+      rightHtmlParts.push(
+        tok('quotaWeeklyIcon', '📅', show.quotaWeeklyIcon),
+        tok('quotaWeekly', valHtml, show.quotaWeekly),
+        tok('resetWeekly', esc(rt), show.resetWeekly),
+      );
     }
-    if (opts.withCache && cacheBlock) parts.push(cacheBlock);
-    let text = parts.join('  ');
-    if (opts.withState && stateLabel) text = text ? `${text} | ${stateLabel}` : stateLabel;
-    return text;
+  }
+  const rightPlain = rightPlainParts.join(' ');
+  const rightHtml = rightHtmlParts.join(' ');
+  const pad = ' '.repeat(Math.max(2, width - displayWidth(leftPlain) - displayWidth(rightPlain)));
+  const baseColor = state.textColor === 'fixed' ? PALETTES[theme].body : state.textColor === 'muted' ? PALETTES[theme].muted : null;
+  const rowHtml = leftHtml + pad + rightHtml;
+  return baseColor ? `<span style="color:${baseColor}">${rowHtml}</span>` : rowHtml;
+}
+
+function renderPreviewRowHtml(payload, ageSec, theme) {
+  const { show } = state;
+  const width = Math.max(1, termWidth - 2);
+  const ctx = payload.context_window;
+  const pct = `${ctx.used_percentage.toFixed(1)}%`;
+  const cap = `(${formatTokens(ctx.context_window_size)})`;
+  const u = ctx.current_usage;
+  const cacheHit = u && width >= 30
+    ? `${(u.cache_read_input_tokens / (u.input_tokens + u.cache_read_input_tokens) * 100).toFixed(1)}%` : null;
+
+  const buildLeft = (opts) => {
+    const ctxParts = [];
+    if (opts.withContext && show.contextLabel) ctxParts.push(opts.shortContext ? 'C' : 'Ctx');
+    if (opts.withContext && show.context) ctxParts.push(pct);
+    if (opts.withCapacity && show.capacity) ctxParts.push(cap);
+    const cacheParts = [];
+    if (opts.withCache && cacheHit !== null) {
+      if (show.cacheLabel) cacheParts.push('Cache');
+      if (show.cache) cacheParts.push(cacheHit);
+      if (cacheParts.length && state.cache === 'dot') cacheParts.push('●');
+    }
+    return [ctxParts.join(' '), cacheParts.join(' ')].filter(Boolean).join('  ');
   };
-  const quotaEnabled = show.quota && (show.quota5h || show.quotaWeekly);
+
+  const anyRightEnabled = show.quotaGroup || show.quota5hIcon || show.quota5h || show.reset5h || show.quotaWeeklyIcon || show.quotaWeekly || show.resetWeekly;
   const buildRight = (countdown, showName) => {
-    if (!quotaEnabled) return '';
+    if (!anyRightEnabled) return '';
     const selected = currentGroup(payload.model, payload.quota);
-    if (!selected) return '--';
+    if (!selected) return (show.quota5h || show.quotaWeekly) ? '--' : '';
     const parts = [];
     for (const [id, bucket] of Object.entries(payload.quota)) {
       const meta = KNOWN_BUCKETS[id];
       if (!meta || meta[0] !== selected || bucket.disabled) continue;
       const kind = meta[1];
-      if (kind === '5h' && !show.quota5h) continue;
-      if (kind === 'weekly' && !show.quotaWeekly) continue;
-      const labelMode = kind === '5h' ? state.quota5hLabel : state.quotaWeeklyLabel;
-      const prefix = WINDOW_LABELS[kind][labelMode] || '';
-      const showReset = countdown && (kind === '5h' ? show.reset5h : show.resetWeekly);
-      parts.push(`${prefix ? prefix + ' ' : ''}${Math.round(bucket.remaining_fraction * 100)}%${showReset ? resetText(bucket) : ''}`);
+      const val = `${Math.round(bucket.remaining_fraction * 100)}%`;
+      const bp = [];
+      if (kind === '5h') {
+        if (show.quota5hIcon) bp.push('🕔');
+        if (show.quota5h) bp.push(val);
+        if (countdown && show.reset5h) bp.push(resetText(bucket));
+      } else if (kind === 'weekly') {
+        if (show.quotaWeeklyIcon) bp.push('📅');
+        if (show.quotaWeekly) bp.push(val);
+        if (countdown && show.resetWeekly) bp.push(resetText(bucket));
+      }
+      if (bp.length) parts.push(bp.join(' '));
     }
-    if (!parts.length) return '--';
-    return `${state.quota === 'dot' ? '● ' : ''}${showName ? selected + ' ' : ''}${parts.join(' ')}`;
+    const text = [showName ? selected : '', ...parts].filter(Boolean).join(' ');
+    return text ? `${state.quota === 'dot' ? '● ' : ''}${text}` : '';
   };
 
-  let leftOpts = { withContext: true, withCapacity: true, withCache: true, withState: true, shortContext: false };
+  let leftOpts = { withContext: true, withCapacity: true, withCache: true, shortContext: false };
   let left = buildLeft(leftOpts);
   let right = buildRight(width >= 70, show.quotaGroup);
   const fits = () => displayWidth(left) + (left && right ? 2 : 0) + displayWidth(right) <= width;
 
-  if (!fits()) { leftOpts = { ...leftOpts, withState: false }; left = buildLeft(leftOpts); }
   if (!fits()) right = buildRight(false, show.quotaGroup);
-  if (!fits() && show.context) { leftOpts = { ...leftOpts, withCache: false }; left = buildLeft(leftOpts); }
-  if (!fits()) { leftOpts = { ...leftOpts, withCapacity: false }; left = buildLeft(leftOpts); }
+  if (!fits() && (show.context || show.contextLabel || show.capacity)) { leftOpts = { ...leftOpts, withCache: false }; left = buildLeft(leftOpts); }
+  if (!fits() && (show.context || show.contextLabel)) { leftOpts = { ...leftOpts, withCapacity: false }; left = buildLeft(leftOpts); }
   if (!fits()) right = buildRight(false, false);
   let leftClipped = false;
   if (!fits()) {
     if (right) {
-      leftOpts = { withContext: width >= 12 && show.context, withCapacity: false, withCache: false, withState: false, shortContext: true };
+      leftOpts = { withContext: width >= 12 && (show.context || show.contextLabel), withCapacity: false, withCache: false, shortContext: true };
       left = buildLeft(leftOpts);
       const budget = Math.max(1, width - displayWidth(left) - (left ? 1 : 0));
       right = clipText(right, budget);
     } else {
-      leftOpts = { ...leftOpts, withCache: show.context ? false : leftOpts.withCache, shortContext: true };
+      leftOpts = { ...leftOpts, withCache: (show.context || show.contextLabel) ? false : leftOpts.withCache, shortContext: true };
       left = buildLeft(leftOpts);
       if (!fits()) { left = clipText(left, width); leftClipped = true; }
     }
@@ -827,23 +688,26 @@ function renderStatusHtml(payload, ageSec, theme) {
   const cacheTone = ageSec >= 240 ? 'red' : ageSec >= 180 ? 'amber' : 'neutral';
   let leftHtml = esc(left);
   if (left && !leftClipped) {
-    const parts = [];
+    const ctxParts = [];
+    if (leftOpts.withContext && show.contextLabel) ctxParts.push(leftOpts.shortContext ? 'C' : 'Ctx');
     if (leftOpts.withContext && show.context) {
-      const coreText = leftOpts.shortContext ? (state.contextLabel === 'en' ? `C ${pct}` : pct) : contextBase;
-      let coreHtml = esc(coreText);
-      if (state.context === 'text' && ctx.used_percentage >= 75) {
-        coreHtml = coreHtml.replace(esc(pct), span(pct, ctx.used_percentage >= 90 ? 'red' : 'amber', theme));
+      ctxParts.push(state.context === 'text' && ctx.used_percentage >= 75
+        ? span(pct, ctx.used_percentage >= 90 ? 'red' : 'amber', theme) : esc(pct));
+    }
+    if (leftOpts.withCapacity && show.capacity) ctxParts.push(esc(cap));
+    let cacheHtml = '';
+    if (leftOpts.withCache && cacheHit !== null) {
+      const cp = [];
+      if (show.cacheLabel) cp.push('Cache');
+      if (show.cache) cp.push(cacheHit);
+      if (cp.length) {
+        const raw = cp.join(' ');
+        if (state.cache === 'dot') cacheHtml = `${esc(raw)} ${span('●', cacheTone, theme)}`;
+        else if (state.cache === 'text' && cacheTone !== 'neutral') cacheHtml = span(raw, cacheTone, theme);
+        else cacheHtml = esc(raw);
       }
-      parts.push(coreHtml + (leftOpts.withCapacity ? esc(capacityText) : ''));
     }
-    if (leftOpts.withCache && cacheBlock) {
-      let cHtml = esc(cacheBlock);
-      if (state.cache === 'dot') cHtml = cHtml.replace('●', span('●', cacheTone, theme));
-      else if (state.cache === 'text' && cacheTone !== 'neutral') cHtml = span(cacheBlock, cacheTone, theme);
-      parts.push(cHtml);
-    }
-    leftHtml = parts.join('  ');
-    if (leftOpts.withState && stateLabel) leftHtml = leftHtml ? `${leftHtml} | ${esc(stateLabel)}` : esc(stateLabel);
+    leftHtml = [ctxParts.join(' '), cacheHtml].filter(Boolean).join('  ');
   }
   let rightHtml = esc(right);
   if (right) {
@@ -861,29 +725,23 @@ function diffCount(modeName) {
   const base = MODES[modeName];
   let n = 0;
   for (const k of SHOW_KEYS) if (state.show[k] !== base[k]) n++;
-  if (state.contextLabel !== MODE_LABELS[modeName].contextLabel) n++;
-  if (state.cacheLabel !== MODE_LABELS[modeName].cacheLabel) n++;
   return n;
 }
-
 function bestMode() {
   return diffCount('compact') < diffCount('standard') ? 'compact' : 'standard';
 }
-
 function getOverrides(modeName) {
   const base = MODES[modeName];
   const overrides = {};
   for (const k of SHOW_KEYS) if (state.show[k] !== base[k]) overrides[k] = state.show[k];
   return overrides;
 }
-
 function isExactDefault() {
-  for (const k of ['textColor', 'context', 'cache', 'quota', 'contextLabel', 'cacheLabel', 'quota5hLabel', 'quotaWeeklyLabel']) {
+  for (const k of ['textColor', 'context', 'cache', 'quota']) {
     if (state[k] !== DEFAULTS[k]) return false;
   }
   return Object.keys(getOverrides('standard')).length === 0;
 }
-
 function buildHelperArgs() {
   if (isExactDefault()) return 'reset';
   const modeName = bestMode();
@@ -894,10 +752,6 @@ function buildHelperArgs() {
     'context', state.context,
     'cache', state.cache,
     'quota', state.quota,
-    'contextLabel', state.contextLabel,
-    'cacheLabel', state.cacheLabel,
-    'quota5hLabel', state.quota5hLabel,
-    'quotaWeeklyLabel', state.quotaWeeklyLabel,
   ];
   const overrides = getOverrides(modeName);
   for (const [k, v] of Object.entries(overrides)) {
@@ -905,7 +759,6 @@ function buildHelperArgs() {
   }
   return args.join(' ');
 }
-
 function buildSettingsJson() {
   const modeName = bestMode();
   const obj = {
@@ -915,72 +768,15 @@ function buildSettingsJson() {
     quota: state.quota,
   };
   if (state.textColor !== DEFAULTS.textColor) obj.textColor = state.textColor;
-  if (state.contextLabel !== MODE_LABELS[modeName].contextLabel) obj.contextLabel = state.contextLabel;
-  if (state.cacheLabel !== MODE_LABELS[modeName].cacheLabel) obj.cacheLabel = state.cacheLabel;
-  if (state.quota5hLabel !== DEFAULTS.quota5hLabel) obj.quota5hLabel = state.quota5hLabel;
-  if (state.quotaWeeklyLabel !== DEFAULTS.quotaWeeklyLabel) obj.quotaWeeklyLabel = state.quotaWeeklyLabel;
   const overrides = getOverrides(modeName);
   if (Object.keys(overrides).length) obj.show = overrides;
   return JSON.stringify(obj, null, 2);
 }
-
 function currentOutputText() {
   const helperArgs = buildHelperArgs();
   if (outputTab === 'agent') return `/capsule-guide ${helperArgs}`;
   if (outputTab === 'cli') return `node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" ${helperArgs}`;
   return buildSettingsJson();
-}
-
-function closeAllDropdowns(except = null) {
-  document.querySelectorAll('.dd.open').forEach(dd => {
-    if (dd !== except) dd.classList.remove('open');
-  });
-}
-
-function renderDropdowns() {
-  const defs = I18N[lang].dd;
-  document.querySelectorAll('.dd[data-select]').forEach(dd => {
-    const key = dd.dataset.select;
-    const options = defs[key];
-    const currentVal = state[key];
-    const current = options.find(o => o.val === currentVal) || options[0];
-    const isActive = currentVal !== 'off';
-    const parents = dd.dataset.parent ? dd.dataset.parent.split(',') : [];
-    const disabled = parents.some(p => !state.show[p]);
-    dd.innerHTML = `
-      <button class="chip${isActive ? ' on' : ''}" type="button" ${disabled ? 'disabled' : ''}>
-        <span>${esc(current.chip)}</span><span class="dd-caret">▾</span>
-      </button>
-      <div class="dd-menu" role="menu">
-        ${options.map(o => `<button class="dd-item${o.val === currentVal ? ' selected' : ''}" type="button" role="menuitem" data-val="${o.val}"><span>${esc(o.menu)}</span><span class="dd-check">✓</span></button>`).join('')}
-      </div>
-    `;
-    const trigger = dd.querySelector(':scope > .chip');
-    trigger.addEventListener('click', e => {
-      e.stopPropagation();
-      const willOpen = !dd.classList.contains('open');
-      closeAllDropdowns(dd);
-      dd.classList.toggle('open', willOpen);
-    });
-    dd.querySelectorAll('.dd-item').forEach(item => {
-      item.addEventListener('click', e => {
-        e.stopPropagation();
-        state[key] = item.dataset.val;
-        closeAllDropdowns();
-        syncUI();
-      });
-    });
-  });
-}
-
-function applyI18n() {
-  const t = I18N[lang];
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (t[key]) el.textContent = t[key];
-  });
-  updateCopyButtonLabel(false);
 }
 
 const COPY_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
@@ -995,22 +791,17 @@ function updateCopyButtonLabel(copied) {
   btn.setAttribute('aria-label', btn.title);
 }
 
+function applyI18n() {
+  const t = I18N[lang];
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key]) el.textContent = t[key];
+  });
+  updateCopyButtonLabel(false);
+}
+
 function syncUI() {
-  // Toggle chips
-  document.querySelectorAll('button.chip[data-show]').forEach(btn => {
-    const on = !!state.show[btn.dataset.show];
-    btn.classList.toggle('on', on);
-    const parents = btn.dataset.parent ? btn.dataset.parent.split(',') : [];
-    btn.disabled = parents.some(p => !state.show[p]);
-  });
-  // Cluster disabled visual
-  document.querySelectorAll('.cluster[data-parent]').forEach(cl => {
-    const parents = cl.dataset.parent.split(',');
-    cl.classList.toggle('disabled', parents.some(p => !state.show[p]));
-  });
-  // Dropdown chips
-  renderDropdowns();
-  // Text color pill group
   document.querySelectorAll('.pill-group[data-select]').forEach(group => {
     const key = group.dataset.select;
     group.querySelectorAll('button[data-val]').forEach(btn => {
@@ -1018,25 +809,31 @@ function syncUI() {
     });
   });
 
-  // Render preview
   const sc = SCENARIOS[scenarioKey];
   const themes = viewTheme === 'both' ? ['light', 'dark'] : [viewTheme];
   const container = document.getElementById('terminals');
   container.innerHTML = themes.map(th => {
     const tag = th === 'light' ? I18N[lang].dayTag : I18N[lang].nightTag;
-    return `<div class="terminal ${th}"><div class="terminal-tag">${esc(tag)}</div><pre>${renderModelLineHtml(sc.payload, th)}\n${renderStatusHtml(sc.payload, sc.ageSec, th)}</pre></div>`;
+    const hint = viewMode === 'edit' ? `<span>${esc(I18N[lang].editHint)}</span>` : '';
+    const row2 = viewMode === 'edit'
+      ? renderEditRowHtml(sc.payload, sc.ageSec, th)
+      : renderPreviewRowHtml(sc.payload, sc.ageSec, th);
+    return `<div class="terminal ${th}"><div class="terminal-head"><span class="terminal-tag">${esc(tag)}</span>${hint}</div><pre>${renderModelLineHtml(sc.payload, th)}\n${row2}</pre></div>`;
   }).join('');
 
-  // Output box + hint
+  container.querySelectorAll('.tok[data-show]').forEach(el => {
+    el.addEventListener('click', () => {
+      const k = el.dataset.show;
+      state.show[k] = !state.show[k];
+      syncUI();
+    });
+  });
+
   document.getElementById('output-box').textContent = currentOutputText();
   const t = I18N[lang];
   document.getElementById('output-hint').textContent = outputTab === 'agent' ? t.hintAgent : outputTab === 'cli' ? t.hintCli : t.hintJson;
   updateCopyButtonLabel(false);
 }
-
-// Global close dropdown on outside click / Escape
-document.addEventListener('click', () => closeAllDropdowns());
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllDropdowns(); });
 
 document.querySelectorAll('[data-lang]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1055,6 +852,14 @@ document.querySelectorAll('[data-theme]').forEach(btn => {
   });
 });
 
+document.querySelectorAll('[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    viewMode = btn.dataset.view;
+    document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b === btn));
+    syncUI();
+  });
+});
+
 document.querySelectorAll('#scenario-pills [data-scenario]').forEach(btn => {
   btn.addEventListener('click', () => {
     scenarioKey = btn.dataset.scenario;
@@ -1067,14 +872,6 @@ document.getElementById('width-slider').addEventListener('input', e => {
   termWidth = Number(e.target.value);
   document.getElementById('width-val').textContent = String(termWidth);
   syncUI();
-});
-
-document.querySelectorAll('button.chip[data-show]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const key = btn.dataset.show;
-    state.show[key] = !state.show[key];
-    syncUI();
-  });
 });
 
 document.querySelectorAll('.pill-group[data-select]').forEach(group => {

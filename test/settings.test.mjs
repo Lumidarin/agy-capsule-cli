@@ -66,47 +66,32 @@ test('mode switching, 12 visibility toggles, quota labels, textColor and legacy 
   assert.equal(onlyWeeklyReset.settings.show.reset5h, false);
   assert.equal(onlyWeeklyReset.settings.show.resetWeekly, true);
 
-  // Context & Cache label modes (en / zh / off) + quota window labels & textColor
-  const styled = settingsCommand([
-    'set', 'contextLabel', '上下文', 'cacheLabel', '缓存',
-    'quota5hLabel', '5h', 'quotaWeeklyLabel', '周', 'textColor', 'muted',
-  ], dir);
-  assert.equal(styled.settings.contextLabel, 'zh');
-  assert.equal(styled.settings.cacheLabel, 'zh');
-  assert.equal(styled.settings.quota5hLabel, 'short');
-  assert.equal(styled.settings.quotaWeeklyLabel, 'zh');
-  assert.equal(styled.settings.textColor, 'muted');
+  // textColor + icon toggles
+  const styled = settingsCommand(['set', 'textColor', 'fixed', 'show.quota5hIcon', 'off', 'show.quotaWeeklyIcon', 'off'], dir);
+  assert.equal(styled.settings.textColor, 'fixed');
+  assert.equal(styled.settings.show.quota5hIcon, false);
+  assert.equal(styled.settings.show.quotaWeeklyIcon, false);
 
-  const bothLabels = settingsCommand(['set', 'quotaLabel', 'off'], dir);
-  assert.equal(bothLabels.settings.quota5hLabel, 'off');
-  assert.equal(bothLabels.settings.quotaWeeklyLabel, 'off');
-
-  // Switch preset with mode command resets show overrides and contextLabel/cacheLabel, preserving alerts/quotaLabels/textColor
+  // Switch preset with mode command resets show overrides and preserves alerts & textColor
   const toStandard = settingsCommand(['mode', 'standard'], dir);
   assert.equal(toStandard.settings.mode, 'standard');
-  assert.equal(toStandard.settings.contextLabel, 'en');
-  assert.equal(toStandard.settings.cacheLabel, 'en');
-  assert.equal(toStandard.settings.quota5hLabel, 'off');
-  assert.equal(toStandard.settings.textColor, 'muted');
+  assert.equal(toStandard.settings.textColor, 'fixed');
   assert.equal(toStandard.settings.show.reset5h, true);
+  assert.equal(toStandard.settings.show.quota5hIcon, true);
   assert.deepEqual(toStandard.overrides, {});
 
   // Full idempotent configurator command round-trip
   const fromConfigurator = settingsCommand([
     'set', 'mode', 'compact', 'textColor', 'inherit', 'context', 'text', 'cache', 'dot', 'quota', 'text',
-    'contextLabel', 'zh', 'cacheLabel', 'zh', 'quota5hLabel', 'short', 'quotaWeeklyLabel', 'short',
-    'show.cache', 'on', 'show.resetWeekly', 'off', 'show.quotaWeekly', 'on',
+    'show.cache', 'on', 'show.quota5hIcon', 'off', 'show.resetWeekly', 'off',
   ], dir);
   assert.equal(fromConfigurator.settings.mode, 'compact');
   assert.equal(fromConfigurator.settings.textColor, 'inherit');
   assert.equal(fromConfigurator.settings.quota, 'text');
-  assert.equal(fromConfigurator.settings.contextLabel, 'zh');
-  assert.equal(fromConfigurator.settings.cacheLabel, 'zh');
-  assert.equal(fromConfigurator.settings.quota5hLabel, 'short');
-  assert.equal(fromConfigurator.settings.quotaWeeklyLabel, 'short');
   assert.equal(fromConfigurator.settings.show.cache, true);
+  assert.equal(fromConfigurator.settings.show.quota5hIcon, false);
   assert.equal(fromConfigurator.settings.show.resetWeekly, false);
-  assert.deepEqual(fromConfigurator.overrides, { cache: true, resetWeekly: false });
+  assert.deepEqual(fromConfigurator.overrides, { cache: true, quota5hIcon: false, resetWeekly: false });
 });
 
 test('invalid settings edits and malformed JSON leave the file unchanged', t => {

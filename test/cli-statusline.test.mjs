@@ -30,58 +30,50 @@ test('compact mode (and legacy compact: true) hides labels, cache and extra stat
   }
 });
 
-test('all 12 per-item visibility switches and quota label modes work independently', () => {
+test('all 12 flat visibility switches operate independently without parent gates', () => {
   const p = { ...samples.cachedResponse, agent_state: 'working', terminal_width: 120 };
-  // Hide context: cache starts at column 0 without leading spaces, and context alert never colors cache %
+  // Row 2 never prints agent_state even while working
+  assert.doesNotMatch(renderStatusline(p, { now }), /working/);
+
+  // Hide context % independently: Ctx and (1.0M) can remain or be toggled separately, and context alert never colors cache %
   const noCtxPayload = structuredClone(p);
   noCtxPayload.context_window.used_percentage = 79.6; // intentionally matches cache hit 79.6%
-  const noCtx = renderStatusline(noCtxPayload, { now, color: true, settings: { show: { context: false } } });
-  assert.match(noCtx, /^Cache 79\.6% /);
-  assert.doesNotMatch(noCtx, /\x1b\[38;2;152;97;0m79\.6%/);
-  assert.doesNotMatch(noCtx, /Ctx|\(1\.0M\)/);
+  const noCtxBlock = renderStatusline(noCtxPayload, { now, color: true, settings: { show: { contextLabel: false, context: false, capacity: false } } });
+  assert.match(noCtxBlock, /^Cache 79\.6% /);
+  assert.doesNotMatch(noCtxBlock, /\x1b\[38;2;152;97;0m79\.6%/);
+  assert.doesNotMatch(noCtxBlock, /Ctx|\(1\.0M\)/);
+
+  // Capacity alone works independently even if context is off
+  const capOnly = renderStatusline(p, { now, settings: { show: { contextLabel: false, context: false, cacheLabel: false, cache: false } } });
+  assert.match(capOnly, /^\(1\.0M\) +● Gemini/);
 
   // Hide capacity only
   const noCap = renderStatusline(p, { now, settings: { show: { capacity: false } } });
   assert.match(noCap, /^Ctx 1\.5%  Cache 79\.6% ●/);
   assert.doesNotMatch(noCap, /\(1\.0M\)/);
 
-  // contextLabel modes: en (Ctx), zh (上下文), off (hidden), plus legacy show.contextLabel
-  const noCtxLabel = renderStatusline(p, { now, settings: { contextLabel: 'off' } });
+  // Hide contextLabel only
+  const noCtxLabel = renderStatusline(p, { now, settings: { show: { contextLabel: false } } });
   assert.match(noCtxLabel, /^1\.5% \(1\.0M\)  Cache 79\.6% ●/);
-  const zhCtxLabel = renderStatusline(p, { now, settings: { contextLabel: 'zh' } });
-  assert.match(zhCtxLabel, /^上下文 1\.5% \(1\.0M\)  Cache 79\.6% ●/);
-  assert.equal(displayWidth(zhCtxLabel), 118);
 
-  // cacheLabel modes: en (Cache), zh (缓存), off (hidden), plus legacy show.cacheLabel
-  const noCacheLabel = renderStatusline(p, { now, settings: { cacheLabel: 'off' } });
-  assert.match(noCacheLabel, /^Ctx 1\.5% \(1\.0M\)  79\.6% ● \| working/);
+  // Hide cacheLabel only
+  const noCacheLabel = renderStatusline(p, { now, settings: { show: { cacheLabel: false } } });
+  assert.match(noCacheLabel, /^Ctx 1\.5% \(1\.0M\)  79\.6% ● +● Gemini/);
   assert.doesNotMatch(noCacheLabel, /Cache/);
-  const zhCacheLabel = renderStatusline(p, { now, settings: { cacheLabel: 'zh' } });
-  assert.match(zhCacheLabel, /^Ctx 1\.5% \(1\.0M\)  缓存 79\.6% ● \| working/);
-  assert.equal(displayWidth(zhCacheLabel), 118);
-  const legacyNoCacheLabel = renderStatusline(p, { now, settings: { show: { cacheLabel: false } } });
-  assert.equal(legacyNoCacheLabel, noCacheLabel);
 
-  // Full Chinese prefixes align cleanly to terminal width
-  const allZh = renderStatusline(p, { now, settings: { contextLabel: 'zh', cacheLabel: 'zh', quota5hLabel: 'zh', quotaWeeklyLabel: 'zh' } });
-  assert.match(allZh, /^上下文 1\.5% \(1\.0M\)  缓存 79\.6% ● \| working +● Gemini 5小时 97% \(3h 0m\) 周 19% \(4d 0h\)$/);
-  assert.equal(displayWidth(allZh), 118);
-
-  // Hide cache only in standard mode
-  const noCache = renderStatusline(p, { now, settings: { show: { cache: false } } });
-  assert.match(noCache, /^Ctx 1\.5% \(1\.0M\) \| working +● Gemini/);
+  // Hide cache % and label in standard mode
+  const noCache = renderStatusline(p, { now, settings: { show: { cacheLabel: false, cache: false } } });
+  assert.match(noCache, /^Ctx 1\.5% \(1\.0M\) +● Gemini/);
   assert.doesNotMatch(noCache, /Cache/);
 
-  // Enable cache on top of compact mode (cacheLabel defaults off in compact, can be set to en/zh)
-  const compactWithCacheNoLabel = renderStatusline(p, { now, settings: { mode: 'compact', show: { cache: true } } });
-  assert.match(compactWithCacheNoLabel, /^1\.5% \(1\.0M\)  79\.6% ● +● 🕔 97%/);
-  const compactWithCacheLabel = renderStatusline(p, { now, settings: { mode: 'compact', cacheLabel: 'zh', show: { cache: true } } });
-  assert.match(compactWithCacheLabel, /^1\.5% \(1\.0M\)  缓存 79\.6% ● +● 🕔 97%/);
+  // Enable cache % on top of compact mode
+  const compactWithCache = renderStatusline(p, { now, settings: { mode: 'compact', show: { cache: true } } });
+  assert.match(compactWithCache, /^1\.5% \(1\.0M\)  79\.6% ● +● 🕔 97%/);
 
-  // Hide state only
-  const noState = renderStatusline(p, { now, settings: { show: { state: false } } });
-  assert.doesNotMatch(noState, /working/);
-  assert.match(noState, /Cache 79\.6% ●/);
+  // Independent 5h & weekly icons
+  const noIcons = renderStatusline(p, { now, settings: { show: { quota5hIcon: false, quotaWeeklyIcon: false } } });
+  assert.ok(noIcons.endsWith('● Gemini 97% (3h 0m) 19% (4d 0h)'));
+  assert.doesNotMatch(noIcons, /🕔|📅/);
 
   // Independent 5h & weekly reset countdowns + legacy show.reset compatibility
   const noReset5h = renderStatusline(p, { now, settings: { show: { reset5h: false } } });
@@ -91,53 +83,34 @@ test('all 12 per-item visibility switches and quota label modes work independent
   const legacyNoReset = renderStatusline(p, { now, settings: { show: { reset: false } } });
   assert.ok(legacyNoReset.endsWith('● Gemini 🕔 97% 📅 19%'));
 
-  // Independent 5h & weekly quota toggles + dot tone ignores hidden window
-  const only5h = renderStatusline(p, { now, settings: { show: { quotaWeekly: false } } });
+  // Independent 5h & weekly quota items + dot tone ignores completely hidden weekly bucket
+  const only5h = renderStatusline(p, { now, settings: { show: { quotaWeeklyIcon: false, quotaWeekly: false, resetWeekly: false } } });
   assert.ok(only5h.endsWith('● Gemini 🕔 97% (3h 0m)'));
   assert.doesNotMatch(only5h, /📅|19%/);
-  const onlyWeekly = renderStatusline(p, { now, settings: { show: { quota5h: false } } });
+  const onlyWeekly = renderStatusline(p, { now, settings: { show: { quota5hIcon: false, quota5h: false, reset5h: false } } });
   assert.ok(onlyWeekly.endsWith('● Gemini 📅 19% (4d 0h)'));
   assert.doesNotMatch(onlyWeekly, /🕔|97%/);
 
   const hiddenRedWeekly = structuredClone(p);
   hiddenRedWeekly.quota['gemini-weekly'].remaining_fraction = 0.05;
-  const hiddenWeeklyColor = renderStatusline(hiddenRedWeekly, { now, color: true, settings: { show: { quotaWeekly: false } } });
-  assert.doesNotMatch(hiddenWeeklyColor, /208;42;48/); // hidden red weekly does not redden dot
-
-  // Both quota5h and quotaWeekly off -> right side hidden cleanly
-  const noBuckets = renderStatusline(p, { now, settings: { show: { quota5h: false, quotaWeekly: false } } });
-  assert.equal(noBuckets, 'Ctx 1.5% (1.0M)  Cache 79.6% ● | working');
-
-  // Quota window label styles: short (5h / w), zh (5小时 / 周) with CJK displayWidth alignment, off
-  const shortLabels = renderStatusline(p, { now, settings: { quota5hLabel: 'short', quotaWeeklyLabel: 'short' } });
-  assert.ok(shortLabels.endsWith('● Gemini 5h 97% (3h 0m) w 19% (4d 0h)'));
-  assert.equal(displayWidth(shortLabels), 118);
-
-  const zhLabels = renderStatusline(p, { now, settings: { quota5hLabel: 'zh', quotaWeeklyLabel: 'zh' } });
-  assert.ok(zhLabels.endsWith('● Gemini 5小时 97% (3h 0m) 周 19% (4d 0h)'));
-  assert.equal(displayWidth(zhLabels), 118);
-
-  const offLabels = renderStatusline(p, { now, settings: { quota5hLabel: 'off', quotaWeeklyLabel: 'off' } });
-  assert.ok(offLabels.endsWith('● Gemini 97% (3h 0m) 19% (4d 0h)'));
-  assert.equal(displayWidth(offLabels), 118);
+  const hiddenWeeklyColor = renderStatusline(hiddenRedWeekly, {
+    now, color: true, settings: { show: { quotaWeeklyIcon: false, quotaWeekly: false, resetWeekly: false } },
+  });
+  assert.doesNotMatch(hiddenWeeklyColor, /208;42;48/);
 
   // Hide quotaGroup only
   const noGroup = renderStatusline(p, { now, settings: { show: { quotaGroup: false } } });
   assert.ok(noGroup.endsWith('● 🕔 97% (3h 0m) 📅 19% (4d 0h)'));
 
-  // Hide quota completely: no trailing padding, fits narrow widths too
+  // Hide all right-side quota items (or legacy show.quota: false): no trailing padding, fits narrow widths
   const noQuota = renderStatusline(p, { now, settings: { show: { quota: false } } });
-  assert.equal(noQuota, 'Ctx 1.5% (1.0M)  Cache 79.6% ● | working');
+  assert.equal(noQuota, 'Ctx 1.5% (1.0M)  Cache 79.6% ●');
   const noQuotaNarrow = renderStatusline({ ...p, terminal_width: 14 }, { now, settings: { show: { quota: false } } });
   assert.ok(displayWidth(noQuotaNarrow) <= 12);
 
-  // Hide context + cache, keep state + quota
-  const stateOnlyLeft = renderStatusline(p, { now, settings: { show: { context: false, cache: false } } });
-  assert.match(stateOnlyLeft, /^working +● Gemini/);
-
-  // Hide everything -> empty line
-  const allHidden = renderStatusline(p, { now, settings: { show: { context: false, cache: false, state: false, quota: false } } });
-  assert.equal(allHidden, '');
+  // Hide all 12 items -> empty line
+  const allOff = Object.fromEntries(Object.keys(MODES.standard).map(k => [k, false]));
+  assert.equal(renderStatusline(p, { now, settings: { show: allOff } }), '');
 });
 
 test('textColor controls row-2 body color (inherit, fixed, muted, plain) while keeping row-1 muted', () => {
@@ -308,18 +281,16 @@ test('settings reload on each read; missing or invalid fields fall back independ
   writeFileSync(path, JSON.stringify({ context: 'off', cache: 'text', quota: 'off' }));
   assert.deepEqual(readSettings(path), { ...DEFAULT_SETTINGS, context: 'off', cache: 'text', quota: 'off', show: { ...MODES.standard } });
   writeFileSync(path, JSON.stringify({
-    context: 'dot', cache: 'off', quota: 'bad', mode: 'compact',
-    textColor: 'muted', contextLabel: 'zh', cacheLabel: 'bad', quota5hLabel: 'zh', quotaWeeklyLabel: 'invalid',
+    context: 'dot', cache: 'off', quota: 'bad', mode: 'compact', textColor: 'fixed',
     show: { cache: true, reset: 'nope' },
   }));
   assert.deepEqual(readSettings(path), {
-    mode: 'compact', textColor: 'muted', context: 'text', cache: 'off', quota: 'dot',
-    contextLabel: 'zh', cacheLabel: 'off', quota5hLabel: 'zh', quotaWeeklyLabel: 'icon',
+    mode: 'compact', textColor: 'fixed', context: 'text', cache: 'off', quota: 'dot',
     show: { ...MODES.compact, cache: true },
   });
   writeFileSync(path, JSON.stringify({ compact: true }));
   assert.deepEqual(readSettings(path), {
-    ...DEFAULT_SETTINGS, mode: 'compact', contextLabel: 'off', cacheLabel: 'off', show: { ...MODES.compact },
+    ...DEFAULT_SETTINGS, mode: 'compact', show: { ...MODES.compact },
   });
   writeFileSync(path, '{broken');
   assert.deepEqual(readSettings(path), DEFAULT_SETTINGS);
@@ -331,7 +302,7 @@ test('install creates display defaults, updates and uninstall keep user choices'
   configure('install', { home });
   const path = join(home, '.gemini', 'config', 'agy-capsule', 'cli', 'settings.json');
   assert.deepEqual(readSettings(path), DEFAULT_SETTINGS);
-  const custom = { mode: 'compact', textColor: 'muted', context: 'off', cache: 'text', quota: 'off', quota5hLabel: 'short', show: { cache: true } };
+  const custom = { mode: 'compact', textColor: 'muted', context: 'off', cache: 'text', quota: 'off', show: { cache: true, quota5hIcon: false } };
   writeFileSync(path, JSON.stringify(custom));
   const expected = normalizeSettings(custom);
   configure('install', { home });
@@ -478,9 +449,10 @@ test('interactive configurator page, installation guide and release workflows ex
   const html = readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
   assert.match(html, /\/capsule-guide /);
   for (const key of Object.keys(MODES.standard)) {
-    assert.ok(html.includes(`data-show="${key}"`), `configurator missing switch for ${key}`);
+    assert.ok(html.includes(`'${key}'`), `configurator missing interactive token for ${key}`);
   }
-  for (const key of ['contextLabel', 'cacheLabel', 'quota5hLabel', 'quotaWeeklyLabel', 'textColor']) {
+  for (const key of ['context', 'cache', 'quota', 'textColor']) {
     assert.ok(html.includes(`data-select="${key}"`), `configurator missing selector for ${key}`);
   }
+  assert.ok(html.includes('data-view="edit"') && html.includes('data-view="preview"'));
 });

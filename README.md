@@ -4,9 +4,9 @@
 
 **Experimental · 0.1.0-experimental.1**
 
-给 Antigravity CLI (`agy`) 的简洁 statusline：左侧 Context、Cache hit，右侧当前模型组额度；支持**通用 (`standard`) / 极简 (`compact`)** 预设切换、**10 项显隐开关 + 4 项中英／图标前缀样式**（`Ctx`/`上下文`/无、`Cache`/`缓存`/无、`🕔`/`5h`/`5小时`/无、`📅`/`w`/`周`/无）与**独立提醒样式**。独立于桌面版 [agy-capsule](https://github.com/Lumidarin/agy-capsule)，不需要桌面 App 运行。
+给 Antigravity CLI (`agy`) 的简洁 statusline：左侧 Context、Cache hit，右侧当前模型组额度；支持**通用 (`standard`) / 极简 (`compact`)** 预设切换、**12 项完全扁平独立的逐项显隐开关**、**正文颜色模式**与**独立提醒样式**。独立于桌面版 [agy-capsule](https://github.com/Lumidarin/agy-capsule)，不需要桌面 App 运行。
 
-> **可视化配置页（GitHub Pages）**：打开 [在线配置器](https://lumidarin.github.io/agy-capsule-cli/)（或本地打开 [docs/index.html](docs/index.html)），勾选想要的每一项并实时预览日／夜效果，**一键复制 `/capsule-guide ...` 指令发给 Agent 生效**。
+> **可视化配置页（GitHub Pages）**：打开 [在线配置器](https://lumidarin.github.io/agy-capsule-cli/)（或本地打开 [docs/index.html](docs/index.html)），**在终端预览里直接点击任意项即可开关**，切到「预览」查看最终效果，点一下复制图标把 `/capsule-guide ...` 发给 Agent 即可生效。
 
 ![昼夜 × 通用／极简四种模式预览](docs/preview.png)
 
@@ -66,45 +66,36 @@ Ctx 14.2% (1.0M)  Cache 98.4% ●       ● Gemini 🕔 96% (2h 26m) 📅 19% (3
 - 关闭原生默认行的叠加（`stack_with_default: false`），由我们重画模型行，因此不显示原生 AI Credits。
 - `Ctx` 为宿主上报的 Context 使用率，括号为窗口容量；K/M 采用十进制缩写。
 - `Cache` 为最近一份请求记录的 `cache_read_input_tokens / (input_tokens + cache_read_input_tokens)`，不是整段会话累计命中率。关闭 `show.cache`（或切换到 `compact` 模式）时不会查询本地会话 SQLite。
-- 额度只取当前识别的模型组：Gemini、Claude、或具有独立周池的 Argon。5h 与周额度、各自前缀（`🕔`/`5h`/`5小时`/无 与 `📅`/`w`/`周`/无）及各自重置倒计时均可独立开关或调整。第三方池在 Claude 模型下标作 Claude；当前没有 GPT 模型映射，不能把所有第三方模型都说成已支持。
-- 窄终端依次减少状态、倒计时等细节，尽量保持指标一行；极窄时截短。图标与中文宽度仍受终端字体影响。
+- 额度只取当前识别的模型组：Gemini、Claude、或具有独立周池的 Argon。组名、5h/周图标（`🕔`/`📅`）、5h/周百分比与两个重置倒计时均可完全独立开关。第三方池在 Claude 模型下标作 Claude；当前没有 GPT 模型映射，不能把所有第三方模型都说成已支持。
+- 窄终端依次减少倒计时、缓存、容量、组名等细节，尽量保持指标一行；极窄时截短。图标宽度仍受终端字体影响。
 - 缺失值显示 `--`；停用的 bucket 隐藏，真实 0% 保留。重置时间已过但 payload 未更新时显示 `(due)`，不擅自恢复到 100%。
 
 ## 本地设置：可视化配置、模式与逐项开关
 
 所有设置保存在 `~/.gemini/config/agy-capsule/cli/settings.json`，在宿主下一次刷新时生效（没有独立 timer，空闲时不保证立即更新）。
 
-### 1. 预设模式（`mode`）与逐项显隐开关（`show.*`）
+### 1. 预设模式（`mode`）与 12 项独立显隐开关（`show.*`）
 
-先选择 `standard`（通用）或 `compact`（极简）预设，再按需覆盖任意单项的显示或隐藏：
+所有显示项完全摊平，无父级联动限制，每一项都能单独开关：
 
-| 位置 | 显示项 | 开关 key (`show.*`) | `standard` | `compact` | 说明 |
-| --- | --- | --- | --- | --- | --- |
-| 左侧 | Context 区块 | `context` | 开 | 开 | 整个 Context 区块（关闭时一并隐藏前缀与容量） |
-| 左侧 | 窗口容量 | `capacity` | 开 | 开 | 括号内的窗口大小 `(1.0M)` |
-| 左侧 | Cache 区块 | `cache` | 开 | 关 | 缓存命中率区块；关闭时跳过 SQLite 查询 |
-| 左侧 | Agent 状态 | `state` | 开 | 关 | 非 idle 时的 `\| working`、`\| tool_use` |
-| 右侧 | 额度区块总开关 | `quota` | 开 | 开 | 右侧当前模型组额度 |
-| 右侧 | 额度组名 | `quotaGroup` | 开 | 关 | `Gemini` / `Claude` / `Argon` |
-| 右侧 | 5 小时额度 | `quota5h` | 开 | 开 | 单独开关 5h 额度项 |
-| 右侧 | 周额度 | `quotaWeekly` | 开 | 开 | 单独开关周额度项 |
-| 右侧 | 5 小时重置倒计时 | `reset5h` | 开 | 开 | 单独开关 5h 的 `(2h 26m)` |
-| 右侧 | 周重置倒计时 | `resetWeekly` | 开 | 开 | 单独开关周额度的 `(3d 23h)` |
+| 位置 | 显示项 | 开关 key (`show.*`) | `standard` | `compact` |
+| --- | --- | --- | --- | --- |
+| 左侧 | `Ctx` 标签 | `contextLabel` | 开 | 关 |
+| 左侧 | Context 使用率（`14.2%`） | `context` | 开 | 开 |
+| 左侧 | 窗口容量（`(1.0M)`） | `capacity` | 开 | 开 |
+| 左侧 | `Cache` 标签 | `cacheLabel` | 开 | 关 |
+| 左侧 | Cache 命中率（`98.4%`） | `cache` | 开 | 关 |
+| 右侧 | 额度组名（`Gemini`/`Claude`/`Argon`） | `quotaGroup` | 开 | 关 |
+| 右侧 | 5h 图标（`🕔`） | `quota5hIcon` | 开 | 开 |
+| 右侧 | 5h 额度（`96%`） | `quota5h` | 开 | 开 |
+| 右侧 | 5h 重置倒计时（`(2h 26m)`） | `reset5h` | 开 | 开 |
+| 右侧 | 周图标（`📅`） | `quotaWeeklyIcon` | 开 | 开 |
+| 右侧 | 周额度（`19%`） | `quotaWeekly` | 开 | 开 |
+| 右侧 | 周重置倒计时（`(3d 23h)`） | `resetWeekly` | 开 | 开 |
 
-> 快捷别名与兼容：`reset` 可同时开关 `reset5h` 与 `resetWeekly`；旧版 `"compact": true` 与 `"show": { "reset": false }` 均继续兼容。
+> 快捷别名与兼容：`reset` 可同时开关 `reset5h` 与 `resetWeekly`；`quota` 可一次开关全部 7 个右侧额度项；旧版 `"compact": true` 继续兼容。
 
-### 2. 前缀标识样式（中英 / 图标 / 关闭）
-
-| JSON key | 可选样式 | 默认（`standard` / `compact`） |
-| --- | --- | --- |
-| `contextLabel` | `en`（`Ctx`）· `zh`（`上下文`）· `off`（不显示） | `en` / `off` |
-| `cacheLabel` | `en`（`Cache`）· `zh`（`缓存`）· `off`（不显示） | `en` / `off` |
-| `quota5hLabel` | `icon`（`🕔`）· `short`（`5h`）· `zh`（`5小时`）· `off` | `icon` |
-| `quotaWeeklyLabel` | `icon`（`📅`）· `short`（`w`）· `zh`（`周`）· `off` | `icon` |
-
-命令行里可用 `quotaLabel` 一次同时设置 5h 与周前缀，例如 `set contextLabel zh cacheLabel zh quotaLabel zh` 可一键切换全中文前缀（`上下文 14.2% (1.0M)  缓存 98.4% ● ... ● Gemini 5小时 96% 周 19%`）。
-
-### 3. 正文颜色（`textColor`）与提醒样式
+### 2. 正文颜色（`textColor`）与提醒样式
 
 | 设置项 | JSON key | 可选模式 | 默认 |
 | --- | --- | --- | --- |
@@ -115,17 +106,17 @@ Ctx 14.2% (1.0M)  Cache 98.4% ●       ● Gemini 🕔 96% (2h 26m) 📅 19% (3
 
 `off` 只关闭颜色提醒，不隐藏数值；若要隐藏整项，请使用 `disable` 或 `show.<item> off`。
 
-### 4. 三种修改方式
+### 3. 三种修改方式
 
 **方式 A：可视化配置页 + `/capsule-guide`（最直观）**
 
-打开 [在线配置器](https://lumidarin.github.io/agy-capsule-cli/) 勾选你想要的状态，点击「一键复制发给 Agent」，粘贴回 AGY 对话发送即可；也可以直接在 AGY 中用自然语言调用 `/capsule-guide`：
+打开 [在线配置器](https://lumidarin.github.io/agy-capsule-cli/)，在「编辑」视图里直接点击底栏每一项开关，点击代码框右侧复制图标，粘贴回 AGY 对话发送即可；也可以直接用自然语言调用 `/capsule-guide`：
 
 ```text
 /capsule-guide
 /capsule-guide 极简模式
-/capsule-guide 图标换成 5h 和 w，关掉周倒计时
-/capsule-guide 极简模式但保留 Cache 且隐藏 Cache 前缀
+/capsule-guide 隐藏图标和周倒计时
+/capsule-guide 极简模式但保留 Cache 命中率
 /capsule-guide reset
 ```
 
@@ -135,20 +126,16 @@ Ctx 14.2% (1.0M)  Cache 98.4% ●       ● Gemini 🕔 96% (2h 26m) 📅 19% (3
 # 查看当前生效设置（只读）
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" show
 
-# 切换预设模式（重置 show 覆写，保留提醒与前缀样式）
+# 切换预设模式（重置 show 覆写，保留正文颜色与提醒样式）
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" mode compact
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" mode standard
 
 # 逐项开启或隐藏（支持驼峰或短横线）
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" enable cache
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" disable cacheLabel resetWeekly quotaGroup
-
-# 修改额度前缀样式（icon / short / zh / off）
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set quota5hLabel short quotaWeeklyLabel short
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set quotaLabel zh
+node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" disable quota5hIcon quotaWeeklyIcon resetWeekly
 
 # 一条命令组合修改
-node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set mode compact show.cache on show.cacheLabel off show.resetWeekly off quotaLabel short
+node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" set mode compact textColor fixed show.cache on show.resetWeekly off
 
 # 恢复全部默认设置
 node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" reset
@@ -161,11 +148,10 @@ node "$HOME/.gemini/config/agy-capsule/cli/settings.mjs" reset
 ```json
 {
   "mode": "compact",
+  "textColor": "fixed",
   "context": "text",
   "cache": "dot",
   "quota": "dot",
-  "quota5hLabel": "short",
-  "quotaWeeklyLabel": "short",
   "show": {
     "cache": true,
     "resetWeekly": false
